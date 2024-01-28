@@ -1,5 +1,4 @@
 import argparse
-import os
 import requests_cache
 from pandas import DataFrame
 from retry_requests import retry
@@ -32,9 +31,9 @@ class ApiClient:
         url = "https://archive-api.open-meteo.com/v1/archive"
         params = {
             "latitude": lat,
-            "longitude": 13.41,
-            "start_date": "2024-01-12",
-            "end_date": "2024-01-26",
+            "longitude": lon,
+            "start_date": start,
+            "end_date": end,
             "daily": ["weather_code", "temperature_2m_max", "temperature_2m_min", "temperature_2m_mean",
                       "apparent_temperature_max", "apparent_temperature_min", "apparent_temperature_mean", "sunrise",
                       "sunset", "daylight_duration", "sunshine_duration", "precipitation_sum", "rain_sum",
@@ -106,18 +105,18 @@ def main():
 
     # default values are for Kyiv
     parser.add_argument(
-        "--lat", help="Latitude", required=True, dest="lat", default=50.450001
+        "--lat", help="Latitude", required=False, dest="lat", default=50.450001
     )
     parser.add_argument(
-        "--lon", help="Longitude", required=True, dest="lon", default=30.523333
+        "--lon", help="Longitude", required=False, dest="lon", default=30.523333
     )
     parser.add_argument(
         "--start", help="Start time (ISO 8601) ",
-        required=True, dest="start", default="2024-01-12"
+        required=False, dest="start", default="2023-01-12"
     )
     parser.add_argument(
         "--end", help="End time (ISO 8601) ",
-        required=True, dest="end", default="2024-01-26"
+        required=False, dest="end", default="2024-01-26"
     )
 
     args = parser.parse_args()
@@ -125,7 +124,9 @@ def main():
     api_client = ApiClient()
     weather_history = api_client.get_weather_history(args.lat, args.lon, args.start, args.end)
 
-    print(weather_history)
+    pd.set_option('display.max_columns', None)
+
+    print(weather_history )
 
 
 if __name__ == "__main__":
