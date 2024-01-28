@@ -1,35 +1,45 @@
+from ipyleaflet import Map, Marker
+
 import panel as pn
-import param
+
+pn.extension("ipywidgets", sizing_mode="stretch_width")
+
+ACCENT_BASE_COLOR = "#DAA520"
 
 
-class GoogleMapViewer(param.Parameterized):
-    continent = param.ObjectSelector(default='Asia',
-                                     objects=['Africa', 'Asia', 'Europe'])
+def get_marker_and_map():
+    center = (52.204793, 360.121558)
 
-    country = param.ObjectSelector(default='China',
-                                   objects=['China', 'Thailand', 'Japan'])
+    lmap = Map(center=center, zoom=15, height=500)
 
-    _countries = {'Africa': ['Ghana', 'Togo', 'South Africa', 'Tanzania'],
-                  'Asia': ['China', 'Thailand', 'Japan'],
-                  'Europe': ['Austria', 'Bulgaria', 'Greece', 'Portugal',
-                             'Switzerland']}
-
-    @param.depends('continent', watch=True)
-    def _update_countries(self):
-        countries = self._countries[self.continent]
-        self.param['country'].objects = countries
-        self.country = countries[0]
-
-    @param.depends('country')
-    def view(self):
-        iframe = """
-        <iframe width="800" height="400" src="https://maps.google.com/maps?q={country}&z=6&output=embed"
-        frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
-        """.format(country=self.country)
-        return pn.pane.HTML(iframe, height=400)
+    marker = Marker(location=center, draggable=True)
+    lmap.add(marker)
+    lmap.layout.height = "100%"
+    lmap.layout.width = "100%"
+    return marker, lmap
 
 
-viewer = GoogleMapViewer(name='Google Map Viewer')
-application = pn.Row(viewer.param, viewer.view)
+marker, lmap = get_marker_and_map()
 
-application.servable()
+json_widget = pn.pane.JSON({}, height=75)
+
+
+def on_location_changed(event):
+    new = event["new"]
+    json_widget.object = {"x": new[0], "y": new[1]}
+
+
+marker.observe(on_location_changed, 'location')
+
+component = pn.Column(
+    pn.panel(lmap, sizing_mode="stretch_both", min_height=500),
+    json_widget
+)
+
+template = pn.template.FastListTemplate(
+    title="IPyLeaflet",
+    logo="https://panel.holoviz.org/_static/logo_stacked.png",
+    header_background=ACCENT_BASE_COLOR,
+    accent_base_color=ACCENT_BASE_COLOR,
+    main=[component],
+).servable()
