@@ -31,7 +31,9 @@ class MapViewer:
         if kwargs.get('type') == 'click':
             latlon = kwargs.get('coordinates')
             Map.default_style = {'cursor': 'wait'}
-            self.json_widget.object = {"x": latlon[0], "y": latlon[1]}
+            self.current_points = latlon
+            self.json_widget.object = {"x": self.current_points[0],
+                                       "y": self.current_points[1]}
             Map.default_style = {'cursor': 'pointer'}
 
 
