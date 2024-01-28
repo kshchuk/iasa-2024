@@ -1,4 +1,4 @@
-from ipyleaflet import Map, Marker
+from ipyleaflet import Map
 
 import panel as pn
 
@@ -6,33 +6,34 @@ pn.extension("ipywidgets", sizing_mode="stretch_width")
 
 ACCENT_BASE_COLOR = "#DAA520"
 
-
-def get_marker_and_map():
-    center = (52.204793, 360.121558)
-
-    lmap = Map(center=center, zoom=15, height=500)
-
-    marker = Marker(location=center, draggable=True)
-    lmap.add(marker)
-    lmap.layout.height = "100%"
-    lmap.layout.width = "100%"
-    return marker, lmap
+current_points = 0, 0
 
 
-marker, lmap = get_marker_and_map()
+def create_map():
+    center = (50.45, 30.52)
+    map = Map(center=center, zoom=5, height=500)
+    map.layout.height = "100%"
+    map.layout.width = "100%"
+    return map
+
+
+map = create_map()
 
 json_widget = pn.pane.JSON({}, height=75)
 
 
-def on_location_changed(event):
-    new = event["new"]
-    json_widget.object = {"x": new[0], "y": new[1]}
+def handler(**kwargs):
+    if kwargs.get('type') == 'click':
+        latlon = kwargs.get('coordinates')
+        Map.default_style = {'cursor': 'wait'}
+        json_widget.object = {"x": latlon[0], "y": latlon[1]}
+        Map.default_style = {'cursor': 'pointer'}
 
 
-marker.observe(on_location_changed, 'location')
+map.on_interaction(handler)
 
 component = pn.Column(
-    pn.panel(lmap, sizing_mode="stretch_both", min_height=500),
+    pn.panel(map, sizing_mode="stretch_both", min_height=500),
     json_widget
 )
 
