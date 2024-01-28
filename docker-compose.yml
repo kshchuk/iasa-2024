@@ -1,0 +1,8 @@
+version: "1"
+services:
+  weathercast:
+    build: .
+    ports:
+      - "5006:5006"
+    volumes:
+      - ./src:/app
