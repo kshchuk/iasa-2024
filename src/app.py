@@ -1,40 +1,45 @@
 from ipyleaflet import Map
-
 import panel as pn
 
 pn.extension("ipywidgets", sizing_mode="stretch_width")
 
 ACCENT_BASE_COLOR = "#DAA520"
 
-current_points = 0, 0
+
+class MapViewer:
+    def __init__(self):
+        self.map = None
+        self.json_widget = None
+        self.current_points = (0, 0)
+        self.create_map()
+        self.create_widgets()
+        self.setup_interaction()
+
+    def create_map(self):
+        center = (50.45, 30.52)
+        self.map = Map(center=center, zoom=5, height=500)
+        self.map.layout.height = "100%"
+        self.map.layout.width = "100%"
+
+    def create_widgets(self):
+        self.json_widget = pn.pane.JSON({}, height=75)
+
+    def setup_interaction(self):
+        self.map.on_interaction(self.handler)
+
+    def handler(self, **kwargs):
+        if kwargs.get('type') == 'click':
+            latlon = kwargs.get('coordinates')
+            Map.default_style = {'cursor': 'wait'}
+            self.json_widget.object = {"x": latlon[0], "y": latlon[1]}
+            Map.default_style = {'cursor': 'pointer'}
 
 
-def create_map():
-    center = (50.45, 30.52)
-    map = Map(center=center, zoom=5, height=500)
-    map.layout.height = "100%"
-    map.layout.width = "100%"
-    return map
-
-
-map = create_map()
-
-json_widget = pn.pane.JSON({}, height=75)
-
-
-def handler(**kwargs):
-    if kwargs.get('type') == 'click':
-        latlon = kwargs.get('coordinates')
-        Map.default_style = {'cursor': 'wait'}
-        json_widget.object = {"x": latlon[0], "y": latlon[1]}
-        Map.default_style = {'cursor': 'pointer'}
-
-
-map.on_interaction(handler)
+map_viewer = MapViewer()
 
 component = pn.Column(
-    pn.panel(map, sizing_mode="stretch_both", min_height=500),
-    json_widget
+    pn.panel(map_viewer.map, sizing_mode="stretch_both", min_height=500),
+    map_viewer.json_widget
 )
 
 template = pn.template.FastListTemplate(
