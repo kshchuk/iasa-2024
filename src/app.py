@@ -32,4 +32,4 @@ class GoogleMapViewer(param.Parameterized):
 viewer = GoogleMapViewer(name='Google Map Viewer')
 application = pn.Row(viewer.param, viewer.view)
 
-pn.serve(application)
+application.servable()
