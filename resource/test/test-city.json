@@ -1,0 +1,81 @@
+[
+  {
+    "id": 703448,
+    "city": {
+      "id": {
+        "$numberLong": "703448"
+      },
+      "name": "Kiev",
+      "findname": "KIEV",
+      "country": "UA",
+      "coord": {
+        "lon": 30.516666,
+        "lat": 50.433334
+      },
+      "zoom": {
+        "$numberLong": "4"
+      }
+    }
+  },
+  {
+    "id": {
+      "$numberLong": "702760"
+    },
+    "city": {
+      "id": {
+        "$numberLong": "702760"
+      },
+      "name": "Lozova",
+      "findname": "LOZOVA",
+      "country": "UA",
+      "coord": {
+        "lon": 36.317551,
+        "lat": 48.88937
+      },
+      "zoom": {
+        "$numberLong": "8"
+      }
+    }
+  },
+  {
+    "id": {
+      "$numberLong": "702972"
+    },
+    "city": {
+      "id": {
+        "$numberLong": "702972"
+      },
+      "name": "Lisichansk",
+      "findname": "LISICHANSK",
+      "country": "UA",
+      "coord": {
+        "lon": 38.44207,
+        "lat": 48.90485
+      },
+      "zoom": {
+        "$numberLong": "11"
+      }
+    }
+  },
+  {
+    "id": {
+      "$numberLong": "703428"
+    },
+    "city": {
+      "id": {
+        "$numberLong": "703428"
+      },
+      "name": "Ladyzhyn",
+      "findname": "LADYZHYN",
+      "country": "UA",
+      "coord": {
+        "lon": 29.23678,
+        "lat": 48.684959
+      },
+      "zoom": {
+        "$numberLong": "10"
+      }
+    }
+  }
+
+]

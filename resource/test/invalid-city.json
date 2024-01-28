@@ -1,0 +1,16 @@
+[
+  {
+    "city": {
+      "name": "Lozova",
+      "findname": "LOZOVA",
+      "country": "UA",
+      "coord": {
+        "lon": 36.317551,
+        "lat": 48.88937
+      },
+      "zoom": {
+        "$numberLong": "8"
+      }
+    }
+  }
+]
