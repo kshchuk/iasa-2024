@@ -5,6 +5,9 @@ from retry_requests import retry
 import pandas as pd
 import openmeteo_requests
 
+from src.utils.analyses_utils import plot_features_evolution
+from src.utils.analyses_utils import print_statistics
+
 
 class ApiClient:
     """
@@ -36,8 +39,8 @@ class ApiClient:
             "start_date": start,
             "end_date": end,
             "daily": ["weather_code", "temperature_2m_max", "temperature_2m_min", "temperature_2m_mean",
-                      "apparent_temperature_max", "apparent_temperature_min", "apparent_temperature_mean", "sunrise",
-                      "sunset", "daylight_duration", "sunshine_duration", "precipitation_sum", "rain_sum",
+                      "apparent_temperature_max", "apparent_temperature_min", "apparent_temperature_mean",
+                      "daylight_duration", "sunshine_duration", "precipitation_sum", "rain_sum",
                       "snowfall_sum", "precipitation_hours", "wind_speed_10m_max", "wind_gusts_10m_max",
                       "wind_direction_10m_dominant"]
         }
@@ -59,17 +62,15 @@ class ApiClient:
         daily_apparent_temperature_max = daily.Variables(4).ValuesAsNumpy()
         daily_apparent_temperature_min = daily.Variables(5).ValuesAsNumpy()
         daily_apparent_temperature_mean = daily.Variables(6).ValuesAsNumpy()
-        daily_sunrise = daily.Variables(7).ValuesAsNumpy()
-        daily_sunset = daily.Variables(8).ValuesAsNumpy()
-        daily_daylight_duration = daily.Variables(9).ValuesAsNumpy()
-        daily_sunshine_duration = daily.Variables(10).ValuesAsNumpy()
-        daily_precipitation_sum = daily.Variables(11).ValuesAsNumpy()
-        daily_rain_sum = daily.Variables(12).ValuesAsNumpy()
-        daily_snowfall_sum = daily.Variables(13).ValuesAsNumpy()
-        daily_precipitation_hours = daily.Variables(14).ValuesAsNumpy()
-        daily_wind_speed_10m_max = daily.Variables(15).ValuesAsNumpy()
-        daily_wind_gusts_10m_max = daily.Variables(16).ValuesAsNumpy()
-        daily_wind_direction_10m_dominant = daily.Variables(17).ValuesAsNumpy()
+        daily_daylight_duration = daily.Variables(7).ValuesAsNumpy()
+        daily_sunshine_duration = daily.Variables(8).ValuesAsNumpy()
+        daily_precipitation_sum = daily.Variables(9).ValuesAsNumpy()
+        daily_rain_sum = daily.Variables(10).ValuesAsNumpy()
+        daily_snowfall_sum = daily.Variables(11).ValuesAsNumpy()
+        daily_precipitation_hours = daily.Variables(12).ValuesAsNumpy()
+        daily_wind_speed_10m_max = daily.Variables(13).ValuesAsNumpy()
+        daily_wind_gusts_10m_max = daily.Variables(14).ValuesAsNumpy()
+        daily_wind_direction_10m_dominant = daily.Variables(15).ValuesAsNumpy()
 
         daily_data = {"date": pd.date_range(
             start=pd.to_datetime(daily.Time(), unit="s"),
@@ -85,8 +86,6 @@ class ApiClient:
         daily_data["apparent_temperature_max"] = daily_apparent_temperature_max
         daily_data["apparent_temperature_min"] = daily_apparent_temperature_min
         daily_data["apparent_temperature_mean"] = daily_apparent_temperature_mean
-        daily_data["sunrise"] = daily_sunrise
-        daily_data["sunset"] = daily_sunset
         daily_data["daylight_duration"] = daily_daylight_duration
         daily_data["sunshine_duration"] = daily_sunshine_duration
         daily_data["precipitation_sum"] = daily_precipitation_sum
@@ -204,7 +203,7 @@ def main():
     )
     parser.add_argument(
         "--start", help="Start time (ISO 8601) ",
-        required=False, dest="start", default="2023-01-12"
+        required=False, dest="start", default="2021-01-12"
     )
     parser.add_argument(
         "--end", help="End time (ISO 8601) ",
@@ -221,6 +220,19 @@ def main():
     pd.set_option('display.width', None)
 
     print(weather_history.head())
+
+    visualise_features = ["temperature_2m_mean", "apparent_temperature_mean", "sunshine_duration", "precipitation_sum",
+                "precipitation_hours", "wind_speed_10m_max", "wind_direction_10m_dominant"]
+
+    all_features = ["weather_code", "temperature_2m_max", "temperature_2m_min", "temperature_2m_mean",
+                      "apparent_temperature_max", "apparent_temperature_min", "apparent_temperature_mean",
+                      "daylight_duration", "sunshine_duration", "precipitation_sum", "rain_sum",
+                      "snowfall_sum", "precipitation_hours", "wind_speed_10m_max", "wind_gusts_10m_max",
+                      "wind_direction_10m_dominant"]
+
+    date = weather_history["date"].tolist()
+    plot_features_evolution(weather_history, all_features, date)
+    print_statistics(weather_history, all_features)
 
 
 if __name__ == "__main__":
