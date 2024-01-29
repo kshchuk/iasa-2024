@@ -5,10 +5,12 @@ from retry_requests import retry
 import pandas as pd
 import openmeteo_requests
 
+
 class ApiClient:
     """
     Api Client for OpenMeteo API.
     """
+
     def __init__(self):
         # Setup the Open-Meteo API client with cache and retry on error
         self._cache_session = requests_cache.CachedSession('.cache', expire_after=-1)
@@ -162,6 +164,7 @@ class ApiClient:
             freq=pd.Timedelta(seconds=hourly.Interval()),
             inclusive="left"
         )}
+
         hourly_data["temperature_2m"] = hourly_temperature_2m
         hourly_data["relative_humidity_2m"] = hourly_relative_humidity_2m
         hourly_data["dew_point_2m"] = hourly_dew_point_2m
