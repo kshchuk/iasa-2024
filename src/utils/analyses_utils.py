@@ -1,3 +1,5 @@
+from enum import Enum, auto
+
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -33,3 +35,7 @@ def print_statistics(data_frame: pd.DataFrame, features: list[str]):
     :return: None
     """
     print(data_frame[features].describe().transpose())
+
+class DataFrameType(Enum):
+    Daily = auto()
+    Hourly = auto()

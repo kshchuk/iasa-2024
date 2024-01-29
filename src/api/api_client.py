@@ -7,6 +7,7 @@ import openmeteo_requests
 
 from src.utils.analyses_utils import plot_features_evolution
 from src.utils.analyses_utils import print_statistics
+from src.weather_prediction.prophet.prophet_daily_model import ProphetDailyModel
 
 
 class ApiClient:
@@ -39,10 +40,8 @@ class ApiClient:
             "start_date": start,
             "end_date": end,
             "daily": ["weather_code", "temperature_2m_max", "temperature_2m_min", "temperature_2m_mean",
-                      "apparent_temperature_max", "apparent_temperature_min", "apparent_temperature_mean",
-                      "daylight_duration", "sunshine_duration", "precipitation_sum", "rain_sum",
-                      "snowfall_sum", "precipitation_hours", "wind_speed_10m_max", "wind_gusts_10m_max",
-                      "wind_direction_10m_dominant"]
+                      "sunshine_duration", "precipitation_sum", "precipitation_hours", "wind_speed_10m_max",
+                      "wind_gusts_10m_max", "wind_direction_10m_dominant"]
         }
         responses = self._openmeteo.weather_api(url, params=params)
 
@@ -59,18 +58,12 @@ class ApiClient:
         daily_temperature_2m_max = daily.Variables(1).ValuesAsNumpy()
         daily_temperature_2m_min = daily.Variables(2).ValuesAsNumpy()
         daily_temperature_2m_mean = daily.Variables(3).ValuesAsNumpy()
-        daily_apparent_temperature_max = daily.Variables(4).ValuesAsNumpy()
-        daily_apparent_temperature_min = daily.Variables(5).ValuesAsNumpy()
-        daily_apparent_temperature_mean = daily.Variables(6).ValuesAsNumpy()
-        daily_daylight_duration = daily.Variables(7).ValuesAsNumpy()
-        daily_sunshine_duration = daily.Variables(8).ValuesAsNumpy()
-        daily_precipitation_sum = daily.Variables(9).ValuesAsNumpy()
-        daily_rain_sum = daily.Variables(10).ValuesAsNumpy()
-        daily_snowfall_sum = daily.Variables(11).ValuesAsNumpy()
-        daily_precipitation_hours = daily.Variables(12).ValuesAsNumpy()
-        daily_wind_speed_10m_max = daily.Variables(13).ValuesAsNumpy()
-        daily_wind_gusts_10m_max = daily.Variables(14).ValuesAsNumpy()
-        daily_wind_direction_10m_dominant = daily.Variables(15).ValuesAsNumpy()
+        daily_sunshine_duration = daily.Variables(4).ValuesAsNumpy()
+        daily_precipitation_sum = daily.Variables(5).ValuesAsNumpy()
+        daily_precipitation_hours = daily.Variables(6).ValuesAsNumpy()
+        daily_wind_speed_10m_max = daily.Variables(7).ValuesAsNumpy()
+        daily_wind_gusts_10m_max = daily.Variables(8).ValuesAsNumpy()
+        daily_wind_direction_10m_dominant = daily.Variables(9).ValuesAsNumpy()
 
         daily_data = {"date": pd.date_range(
             start=pd.to_datetime(daily.Time(), unit="s"),
@@ -83,14 +76,8 @@ class ApiClient:
         daily_data["temperature_2m_max"] = daily_temperature_2m_max
         daily_data["temperature_2m_min"] = daily_temperature_2m_min
         daily_data["temperature_2m_mean"] = daily_temperature_2m_mean
-        daily_data["apparent_temperature_max"] = daily_apparent_temperature_max
-        daily_data["apparent_temperature_min"] = daily_apparent_temperature_min
-        daily_data["apparent_temperature_mean"] = daily_apparent_temperature_mean
-        daily_data["daylight_duration"] = daily_daylight_duration
         daily_data["sunshine_duration"] = daily_sunshine_duration
         daily_data["precipitation_sum"] = daily_precipitation_sum
-        daily_data["rain_sum"] = daily_rain_sum
-        daily_data["snowfall_sum"] = daily_snowfall_sum
         daily_data["precipitation_hours"] = daily_precipitation_hours
         daily_data["wind_speed_10m_max"] = daily_wind_speed_10m_max
         daily_data["wind_gusts_10m_max"] = daily_wind_gusts_10m_max
@@ -113,15 +100,12 @@ class ApiClient:
         # The order of variables in hourly or daily is important to assign them correctly below
         url = "https://archive-api.open-meteo.com/v1/archive"
         params = {
-            "latitude": 52.52,
-            "longitude": 13.41,
-            "start_date": "2024-01-12",
-            "end_date": "2024-01-26",
-            "hourly": ["temperature_2m", "relative_humidity_2m", "dew_point_2m", "apparent_temperature",
-                       "precipitation", "rain", "snowfall", "snow_depth", "weather_code", "pressure_msl",
-                       "surface_pressure", "cloud_cover", "cloud_cover_low", "cloud_cover_mid", "cloud_cover_high",
-                       "et0_fao_evapotranspiration", "vapour_pressure_deficit", "wind_speed_10m", "wind_speed_100m",
-                       "wind_direction_10m", "wind_direction_100m", "wind_gusts_10m"]
+            "latitude": lat,
+            "longitude": lon,
+            "start_date": start,
+            "end_date": end,
+            "hourly": ["temperature_2m", "relative_humidity_2m", "precipitation", "weather_code", "surface_pressure",
+                       "cloud_cover", "wind_speed_10m", "wind_direction_10m", "wind_gusts_10m"]
         }
         responses = self._openmeteo.weather_api(url, params=params)
 
@@ -136,26 +120,13 @@ class ApiClient:
         hourly = response.Hourly()
         hourly_temperature_2m = hourly.Variables(0).ValuesAsNumpy()
         hourly_relative_humidity_2m = hourly.Variables(1).ValuesAsNumpy()
-        hourly_dew_point_2m = hourly.Variables(2).ValuesAsNumpy()
-        hourly_apparent_temperature = hourly.Variables(3).ValuesAsNumpy()
-        hourly_precipitation = hourly.Variables(4).ValuesAsNumpy()
-        hourly_rain = hourly.Variables(5).ValuesAsNumpy()
-        hourly_snowfall = hourly.Variables(6).ValuesAsNumpy()
-        hourly_snow_depth = hourly.Variables(7).ValuesAsNumpy()
-        hourly_weather_code = hourly.Variables(8).ValuesAsNumpy()
-        hourly_pressure_msl = hourly.Variables(9).ValuesAsNumpy()
-        hourly_surface_pressure = hourly.Variables(10).ValuesAsNumpy()
-        hourly_cloud_cover = hourly.Variables(11).ValuesAsNumpy()
-        hourly_cloud_cover_low = hourly.Variables(12).ValuesAsNumpy()
-        hourly_cloud_cover_mid = hourly.Variables(13).ValuesAsNumpy()
-        hourly_cloud_cover_high = hourly.Variables(14).ValuesAsNumpy()
-        hourly_et0_fao_evapotranspiration = hourly.Variables(15).ValuesAsNumpy()
-        hourly_vapour_pressure_deficit = hourly.Variables(16).ValuesAsNumpy()
-        hourly_wind_speed_10m = hourly.Variables(17).ValuesAsNumpy()
-        hourly_wind_speed_100m = hourly.Variables(18).ValuesAsNumpy()
-        hourly_wind_direction_10m = hourly.Variables(19).ValuesAsNumpy()
-        hourly_wind_direction_100m = hourly.Variables(20).ValuesAsNumpy()
-        hourly_wind_gusts_10m = hourly.Variables(21).ValuesAsNumpy()
+        hourly_precipitation = hourly.Variables(2).ValuesAsNumpy()
+        hourly_weather_code = hourly.Variables(3).ValuesAsNumpy()
+        hourly_surface_pressure = hourly.Variables(4).ValuesAsNumpy()
+        hourly_cloud_cover = hourly.Variables(5).ValuesAsNumpy()
+        hourly_wind_speed_10m = hourly.Variables(6).ValuesAsNumpy()
+        hourly_wind_direction_10m = hourly.Variables(7).ValuesAsNumpy()
+        hourly_wind_gusts_10m = hourly.Variables(8).ValuesAsNumpy()
 
         hourly_data = {"date": pd.date_range(
             start=pd.to_datetime(hourly.Time(), unit="s"),
@@ -166,25 +137,12 @@ class ApiClient:
 
         hourly_data["temperature_2m"] = hourly_temperature_2m
         hourly_data["relative_humidity_2m"] = hourly_relative_humidity_2m
-        hourly_data["dew_point_2m"] = hourly_dew_point_2m
-        hourly_data["apparent_temperature"] = hourly_apparent_temperature
         hourly_data["precipitation"] = hourly_precipitation
-        hourly_data["rain"] = hourly_rain
-        hourly_data["snowfall"] = hourly_snowfall
-        hourly_data["snow_depth"] = hourly_snow_depth
         hourly_data["weather_code"] = hourly_weather_code
-        hourly_data["pressure_msl"] = hourly_pressure_msl
         hourly_data["surface_pressure"] = hourly_surface_pressure
         hourly_data["cloud_cover"] = hourly_cloud_cover
-        hourly_data["cloud_cover_low"] = hourly_cloud_cover_low
-        hourly_data["cloud_cover_mid"] = hourly_cloud_cover_mid
-        hourly_data["cloud_cover_high"] = hourly_cloud_cover_high
-        hourly_data["et0_fao_evapotranspiration"] = hourly_et0_fao_evapotranspiration
-        hourly_data["vapour_pressure_deficit"] = hourly_vapour_pressure_deficit
         hourly_data["wind_speed_10m"] = hourly_wind_speed_10m
-        hourly_data["wind_speed_100m"] = hourly_wind_speed_100m
         hourly_data["wind_direction_10m"] = hourly_wind_direction_10m
-        hourly_data["wind_direction_100m"] = hourly_wind_direction_100m
         hourly_data["wind_gusts_10m"] = hourly_wind_gusts_10m
 
         hourly_dataframe = pd.DataFrame(data=hourly_data)
@@ -203,7 +161,7 @@ def main():
     )
     parser.add_argument(
         "--start", help="Start time (ISO 8601) ",
-        required=False, dest="start", default="2021-01-12"
+        required=False, dest="start", default="2021-01-26"
     )
     parser.add_argument(
         "--end", help="End time (ISO 8601) ",
@@ -221,18 +179,17 @@ def main():
 
     print(weather_history.head())
 
-    visualise_features = ["temperature_2m_mean", "apparent_temperature_mean", "sunshine_duration", "precipitation_sum",
-                "precipitation_hours", "wind_speed_10m_max", "wind_direction_10m_dominant"]
-
     all_features = ["weather_code", "temperature_2m_max", "temperature_2m_min", "temperature_2m_mean",
-                      "apparent_temperature_max", "apparent_temperature_min", "apparent_temperature_mean",
-                      "daylight_duration", "sunshine_duration", "precipitation_sum", "rain_sum",
-                      "snowfall_sum", "precipitation_hours", "wind_speed_10m_max", "wind_gusts_10m_max",
-                      "wind_direction_10m_dominant"]
+                      "sunshine_duration", "precipitation_sum", "precipitation_hours", "wind_speed_10m_max",
+                      "wind_gusts_10m_max", "wind_direction_10m_dominant"]
 
     date = weather_history["date"].tolist()
-    plot_features_evolution(weather_history, all_features, date)
+    # plot_features_evolution(weather_history, all_features, date)
     print_statistics(weather_history, all_features)
+    daily_model = ProphetDailyModel()
+    daily_model.train(weather_history)
+
+
 
 
 if __name__ == "__main__":

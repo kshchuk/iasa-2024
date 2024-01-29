@@ -13,7 +13,7 @@ class MapViewer:
         self.current_points = (0, 0)
         self.create_map()
         self.create_widgets()
-        self.setup_interaction()
+        self.interaction = self.setup_interaction()
 
     def create_map(self):
         center = (50.45, 30.52)

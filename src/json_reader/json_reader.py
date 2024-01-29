@@ -1,6 +1,5 @@
 import json
-import os
-from utils.path_utils import ParentPath
+from src.utils.path_utils import ParentPath
 from pathlib import Path
 
 

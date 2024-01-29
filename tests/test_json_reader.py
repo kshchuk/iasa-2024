@@ -1,4 +1,4 @@
-from json_reader.json_reader import JSONReader
+from src.json_reader.json_reader import JSONReader
 import pytest
 
 

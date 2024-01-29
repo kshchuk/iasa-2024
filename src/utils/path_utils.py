@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 
@@ -19,3 +20,7 @@ class ParentPath:
             raise
 
         self.config_path = config_path
+
+def debugger_is_active() -> bool:
+    """Return if the debugger is currently active"""
+    return hasattr(sys, 'gettrace') and sys.gettrace() is not None
