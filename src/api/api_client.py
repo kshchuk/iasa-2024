@@ -10,9 +10,12 @@ class ApiClient:
     Api Client for OpenMeteo API.
     """
     def __init__(self):
-        pass
+        # Setup the Open-Meteo API client with cache and retry on error
+        self._cache_session = requests_cache.CachedSession('.cache', expire_after=-1)
+        self._retry_session = retry(self._cache_session, retries=5, backoff_factor=0.2)
+        self._openmeteo = openmeteo_requests.Client(session=self._retry_session)
 
-    def get_weather_history(self, lat: float, lon: float, start: str, end: str) -> DataFrame:
+    def get_daily_weather_history(self, lat: float, lon: float, start: str, end: str) -> DataFrame:
         """
         Get weather history for specific location.
 
@@ -22,10 +25,6 @@ class ApiClient:
         :param end: (str) End date ISO 8601, e.g. end=2024-01-26.
         :return: (dict) Weather history.
         """
-        cache_session = requests_cache.CachedSession('.cache', expire_after=-1)
-        retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
-        openmeteo = openmeteo_requests.Client(session=retry_session)
-
         # Make sure all required weather variables are listed here
         # The order of variables in hourly or daily is important to assign them correctly below
         url = "https://archive-api.open-meteo.com/v1/archive"
@@ -40,7 +39,7 @@ class ApiClient:
                       "snowfall_sum", "precipitation_hours", "wind_speed_10m_max", "wind_gusts_10m_max",
                       "wind_direction_10m_dominant"]
         }
-        responses = openmeteo.weather_api(url, params=params)
+        responses = self._openmeteo.weather_api(url, params=params)
 
         # Process first location. Add a for-loop for multiple locations or weather models
         response = responses[0]
@@ -99,6 +98,96 @@ class ApiClient:
         daily_dataframe = pd.DataFrame(data=daily_data)
         return daily_dataframe
 
+    def get_hourly_data(self, lat: float, lon: float, start: str, end: str) -> DataFrame:
+        """
+        Get hourly weather history for specific location.
+
+        :param lat: (float) Latitude.
+        :param lon: (float) Longitude.
+        :param start: (str) Start date ISO 8601, e.g. start=2024-01-12.
+        :param end: (str) End date ISO 8601, e.g. end=2024-01-26.
+        :return: (dict) Weather history.
+        """
+        # Make sure all required weather variables are listed here
+        # The order of variables in hourly or daily is important to assign them correctly below
+        url = "https://archive-api.open-meteo.com/v1/archive"
+        params = {
+            "latitude": 52.52,
+            "longitude": 13.41,
+            "start_date": "2024-01-12",
+            "end_date": "2024-01-26",
+            "hourly": ["temperature_2m", "relative_humidity_2m", "dew_point_2m", "apparent_temperature",
+                       "precipitation", "rain", "snowfall", "snow_depth", "weather_code", "pressure_msl",
+                       "surface_pressure", "cloud_cover", "cloud_cover_low", "cloud_cover_mid", "cloud_cover_high",
+                       "et0_fao_evapotranspiration", "vapour_pressure_deficit", "wind_speed_10m", "wind_speed_100m",
+                       "wind_direction_10m", "wind_direction_100m", "wind_gusts_10m"]
+        }
+        responses = self._openmeteo.weather_api(url, params=params)
+
+        # Process first location. Add a for-loop for multiple locations or weather models
+        response = responses[0]
+        print(f"Coordinates {response.Latitude()}°E {response.Longitude()}°N")
+        print(f"Elevation {response.Elevation()} m asl")
+        print(f"Timezone {response.Timezone()} {response.TimezoneAbbreviation()}")
+        print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
+
+        # Process hourly data. The order of variables needs to be the same as requested.
+        hourly = response.Hourly()
+        hourly_temperature_2m = hourly.Variables(0).ValuesAsNumpy()
+        hourly_relative_humidity_2m = hourly.Variables(1).ValuesAsNumpy()
+        hourly_dew_point_2m = hourly.Variables(2).ValuesAsNumpy()
+        hourly_apparent_temperature = hourly.Variables(3).ValuesAsNumpy()
+        hourly_precipitation = hourly.Variables(4).ValuesAsNumpy()
+        hourly_rain = hourly.Variables(5).ValuesAsNumpy()
+        hourly_snowfall = hourly.Variables(6).ValuesAsNumpy()
+        hourly_snow_depth = hourly.Variables(7).ValuesAsNumpy()
+        hourly_weather_code = hourly.Variables(8).ValuesAsNumpy()
+        hourly_pressure_msl = hourly.Variables(9).ValuesAsNumpy()
+        hourly_surface_pressure = hourly.Variables(10).ValuesAsNumpy()
+        hourly_cloud_cover = hourly.Variables(11).ValuesAsNumpy()
+        hourly_cloud_cover_low = hourly.Variables(12).ValuesAsNumpy()
+        hourly_cloud_cover_mid = hourly.Variables(13).ValuesAsNumpy()
+        hourly_cloud_cover_high = hourly.Variables(14).ValuesAsNumpy()
+        hourly_et0_fao_evapotranspiration = hourly.Variables(15).ValuesAsNumpy()
+        hourly_vapour_pressure_deficit = hourly.Variables(16).ValuesAsNumpy()
+        hourly_wind_speed_10m = hourly.Variables(17).ValuesAsNumpy()
+        hourly_wind_speed_100m = hourly.Variables(18).ValuesAsNumpy()
+        hourly_wind_direction_10m = hourly.Variables(19).ValuesAsNumpy()
+        hourly_wind_direction_100m = hourly.Variables(20).ValuesAsNumpy()
+        hourly_wind_gusts_10m = hourly.Variables(21).ValuesAsNumpy()
+
+        hourly_data = {"date": pd.date_range(
+            start=pd.to_datetime(hourly.Time(), unit="s"),
+            end=pd.to_datetime(hourly.TimeEnd(), unit="s"),
+            freq=pd.Timedelta(seconds=hourly.Interval()),
+            inclusive="left"
+        )}
+        hourly_data["temperature_2m"] = hourly_temperature_2m
+        hourly_data["relative_humidity_2m"] = hourly_relative_humidity_2m
+        hourly_data["dew_point_2m"] = hourly_dew_point_2m
+        hourly_data["apparent_temperature"] = hourly_apparent_temperature
+        hourly_data["precipitation"] = hourly_precipitation
+        hourly_data["rain"] = hourly_rain
+        hourly_data["snowfall"] = hourly_snowfall
+        hourly_data["snow_depth"] = hourly_snow_depth
+        hourly_data["weather_code"] = hourly_weather_code
+        hourly_data["pressure_msl"] = hourly_pressure_msl
+        hourly_data["surface_pressure"] = hourly_surface_pressure
+        hourly_data["cloud_cover"] = hourly_cloud_cover
+        hourly_data["cloud_cover_low"] = hourly_cloud_cover_low
+        hourly_data["cloud_cover_mid"] = hourly_cloud_cover_mid
+        hourly_data["cloud_cover_high"] = hourly_cloud_cover_high
+        hourly_data["et0_fao_evapotranspiration"] = hourly_et0_fao_evapotranspiration
+        hourly_data["vapour_pressure_deficit"] = hourly_vapour_pressure_deficit
+        hourly_data["wind_speed_10m"] = hourly_wind_speed_10m
+        hourly_data["wind_speed_100m"] = hourly_wind_speed_100m
+        hourly_data["wind_direction_10m"] = hourly_wind_direction_10m
+        hourly_data["wind_direction_100m"] = hourly_wind_direction_100m
+        hourly_data["wind_gusts_10m"] = hourly_wind_gusts_10m
+
+        hourly_dataframe = pd.DataFrame(data=hourly_data)
+        return hourly_dataframe
+
 
 def main():
     parser = argparse.ArgumentParser(description="Make Api Request")
@@ -122,11 +211,13 @@ def main():
     args = parser.parse_args()
 
     api_client = ApiClient()
-    weather_history = api_client.get_weather_history(args.lat, args.lon, args.start, args.end)
-
+    weather_history = api_client.get_daily_weather_history(args.lat, args.lon, args.start, args.end)
     pd.set_option('display.max_columns', None)
 
-    print(weather_history )
+    pd.set_option('display.max_colwidth', None)
+    pd.set_option('display.width', None)
+
+    print(weather_history.head())
 
 
 if __name__ == "__main__":
