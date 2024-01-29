@@ -4,6 +4,16 @@ WORKDIR /app
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get update && \
+    apt-get install --yes --no-install-recommends \
+      curl=7.88.1-10+deb12u5 \
+      gcc=4:12.2.0-3 \
+      libsqlite3-dev=3.40.1-2 \
+      nano=7.2-1 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Create a user and group with specific UID and GID
 RUN groupadd -g 1001 app && \
     useradd -u 1001 -g app -s /bin/false -m app
