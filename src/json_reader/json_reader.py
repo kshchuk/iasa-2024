@@ -1,5 +1,5 @@
 import json
-from src.utils.path_utils import ParentPath
+from utils.path_utils import ParentPath
 from pathlib import Path
 
 
@@ -12,6 +12,5 @@ class JSONReader:
     @staticmethod
     def read_file(filename):
         base_dir = JSONReader._get_base_dir()
-
         with Path(f"{base_dir}/" + filename).open("r") as f:
             return json.load(f)

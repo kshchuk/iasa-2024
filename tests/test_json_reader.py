@@ -1,22 +1,28 @@
-from src.json_reader.json_reader import JSONReader
+from json import JSONDecodeError
+
 import pytest
+
+from json_reader.json_reader import JSONReader
 
 
 def test_json_reader_ok():
-    city_list = JSONReader.read_cities_from_file("resource/test/test-city.json")
-    assert len(city_list) == 4
-    kiev = city_list[0]
+    city_list = JSONReader.read_file("resource/test/test-city.json")
+    assert len(city_list) == 5
+    ushuaia = city_list[0]
 
-    assert kiev.name == "Kiev"
-    assert kiev.findname == "KIEV"
-    assert kiev.coord == {
-        "lon": 30.516666,
-        "lat": 50.433334
-    }
-    assert kiev.country == "UA"
-    assert kiev.id == 703448
+    assert ushuaia['name'] == "Ushuaia"
+    assert ushuaia['country'] == "Argentina"
+    assert ushuaia['id'] == 1
+
+    grytviken = city_list[1]
+
+    assert grytviken['name'] == "Grytviken"
+    assert grytviken['state'] == "South Georgia and the South Sandwich Islands"
+    assert grytviken['id'] == 2
 
 
-def test_json_reader_invalid_data():
-    with pytest.raises(KeyError):
-        JSONReader.read_cities_from_file("resource/test/invalid-city.json")
+def test_json_reader_invalid():
+    with pytest.raises(FileNotFoundError):
+        JSONReader.read_file("resource/test/NO_SUCH_FILE")
+    with pytest.raises(JSONDecodeError):
+        JSONReader.read_file("resource/test/invalid-json.json")

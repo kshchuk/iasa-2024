@@ -1,81 +1,41 @@
-[
-  {
-    "id": 703448,
-    "city": {
-      "id": {
-        "$numberLong": "703448"
-      },
-      "name": "Kiev",
-      "findname": "KIEV",
-      "country": "UA",
-      "coord": {
-        "lon": 30.516666,
-        "lat": 50.433334
-      },
-      "zoom": {
-        "$numberLong": "4"
-      }
-    }
-  },
-  {
-    "id": {
-      "$numberLong": "702760"
-    },
-    "city": {
-      "id": {
-        "$numberLong": "702760"
-      },
-      "name": "Lozova",
-      "findname": "LOZOVA",
-      "country": "UA",
-      "coord": {
-        "lon": 36.317551,
-        "lat": 48.88937
-      },
-      "zoom": {
-        "$numberLong": "8"
-      }
-    }
-  },
-  {
-    "id": {
-      "$numberLong": "702972"
-    },
-    "city": {
-      "id": {
-        "$numberLong": "702972"
-      },
-      "name": "Lisichansk",
-      "findname": "LISICHANSK",
-      "country": "UA",
-      "coord": {
-        "lon": 38.44207,
-        "lat": 48.90485
-      },
-      "zoom": {
-        "$numberLong": "11"
-      }
-    }
-  },
-  {
-    "id": {
-      "$numberLong": "703428"
-    },
-    "city": {
-      "id": {
-        "$numberLong": "703428"
-      },
-      "name": "Ladyzhyn",
-      "findname": "LADYZHYN",
-      "country": "UA",
-      "coord": {
-        "lon": 29.23678,
-        "lat": 48.684959
-      },
-      "zoom": {
-        "$numberLong": "10"
-      }
-    }
-  }
-
-]
+[ {
+  "id" : 1,
+  "name" : "Ushuaia",
+  "country" : "Argentina",
+  "state" : "Argentina, Tierra del Fuego",
+  "lat" : -54.799999,
+  "lon" : -68.300003,
+  "population" : 56825
+}, {
+  "id" : 2,
+  "name" : "Grytviken",
+  "country" : "South Georgia and the South Sandwich Islands",
+  "state" : "South Georgia and the South Sandwich Islands",
+  "lat" : -54.281109,
+  "lon" : -36.509201,
+  "population" : 2
+}, {
+  "id" : 3,
+  "name" : "Punta Arenas",
+  "country" : "Chile",
+  "state" : "Chile, Magallanes y de la Antártica Chilena",
+  "lat" : -53.150002,
+  "lon" : -70.916672,
+  "population" : 117430
+}, {
+  "id" : 4,
+  "name" : "Puerto Natales",
+  "country" : "Chile",
+  "state" : "Chile, Magallanes y de la Antártica Chilena",
+  "lat" : -51.723629,
+  "lon" : -72.48745,
+  "population" : 20000
+}, {
+  "id" : 5,
+  "name" : "Rio Gallegos",
+  "country" : "Argentina",
+  "state" : "Argentina, Santa Cruz",
+  "lat" : -51.622608,
+  "lon" : -69.218132,
+  "population" : 95796
+}]
