@@ -17,7 +17,7 @@ docker-compose down
 ```
 
 ### Direct app startup
-
+You also can locally start the app even without docker:
 ```shell
 panel serve src/app.py --autoreload --port 5008
 ```
