@@ -33,6 +33,15 @@ def validate_first_city(city):
 
 
 def test_search_by_id():
-    collection = CityCollectionBuilder(FilePaths.TEST_CITIES_FILE).build()
+    collection = create_collection()
     ushuaia = collection.get_city_by_id(1)
     validate_first_city(ushuaia)
+
+
+def create_collection():
+    return CityCollectionBuilder(FilePaths.TEST_CITIES_FILE).build()
+
+
+def test_get_all():
+    collection = create_collection()
+    assert len(collection.get_all()) == 5

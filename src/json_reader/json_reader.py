@@ -12,5 +12,5 @@ class JSONReader:
     @staticmethod
     def read_file(filename):
         base_dir = JSONReader._get_base_dir()
-        with Path(f"{base_dir}/" + filename).open("r") as f:
+        with Path(f"{base_dir}/" + filename).open("r",encoding="utf-8") as f:
             return json.load(f)

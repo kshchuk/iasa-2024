@@ -1,6 +1,6 @@
-from src.json_reader.json_reader import JSONReader
+from json_reader.json_reader import JSONReader
 
-from src.json_reader.city import CityInfo
+from json_reader.city import CityInfo
 
 
 class JSONParser:

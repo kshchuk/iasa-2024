@@ -15,7 +15,7 @@ class CityInfo:
 
 
 class CityCollection:
-    cities = {}
+    cities = []
 
     def __init__(self, cities=None):
         if cities:
@@ -25,7 +25,10 @@ class CityCollection:
         self.cities = cities
 
     def get_city_by_id(self, id: int):
-        return self.cities[id]
+        return self.cities[id-1]
+
+    def get_all(self):
+        return self.cities
 
 
 

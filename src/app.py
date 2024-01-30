@@ -1,20 +1,18 @@
+import traceback
+
 import panel.widgets
 from ipyleaflet import Map
 import panel as pn
+import difflib
+from json_reader.autocomplete_helper import AutocompleteHelper
+from json_reader.builder import CityCollectionBuilder
 
 pn.extension("ipywidgets", sizing_mode="stretch_width")
 
 ACCENT_BASE_COLOR = "#DAA520"
 
 
-class SearchBox:
-    def __init__(self):
-        self.word_list = []
-        self.search_field = panel.widgets.AutocompleteInput(
-            name='City', options=self.word_list,
-            case_sensitive=False, search_strategy='includes',
-            placeholder='Search city'
-        )
+
 
 
 class MapViewer:
@@ -24,7 +22,7 @@ class MapViewer:
         self.current_points = (0, 0)
         self.create_map()
         self.create_widgets()
-        self.interaction = self.setup_interaction()
+        self.setup_interaction()
 
     def create_map(self):
         center = (50.45, 30.52)
@@ -47,9 +45,40 @@ class MapViewer:
                                        "y": self.current_points[1]}
             Map.default_style = {'cursor': 'pointer'}
 
+class SearchBox:
+    affected_map = None
+    autocomplete_helper = None
+
+    def __init__(self, autocomplete_helper: AutocompleteHelper, affected_map:MapViewer=None):
+        self.autocomplete_helper = autocomplete_helper
+        self.affected_map = affected_map
+        self.search_field = panel.widgets.AutocompleteInput(
+            name='City', options=autocomplete_helper.all_keys(),
+            case_sensitive=False, search_strategy='includes',
+            placeholder='Search city',
+            min_characters=2
+        )
+        self.search_field.param.watch(self.update_options, 'value', onlychanged=False)
+
+    def update_options(self, event):
+        current_input = event.new
+        if current_input== '':
+            return
+        city = autocomplete_helper.find_by_key(current_input)
+        if self.affected_map:
+            self.affected_map.map.center = (city.lat, city.lon)
+def init_autocomplete_helper():
+    try:
+        return CityCollectionBuilder().build_map()
+    except Exception as e:
+        print("Error while creating AutoCompleteHelper:", e)
+        traceback.print_exc()
+        return AutocompleteHelper()
+
 
 map_viewer = MapViewer()
-search_box = SearchBox()
+autocomplete_helper = init_autocomplete_helper()
+search_box = SearchBox(autocomplete_helper, map_viewer)
 
 map_component = pn.Column(
     pn.panel(map_viewer.map, sizing_mode="stretch_both", min_height=500),
