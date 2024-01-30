@@ -15,7 +15,7 @@ class CityInfo:
 
 
 class CityCollection:
-    cities = []
+    cities = {}
 
     def __init__(self, cities=None):
         if cities:
@@ -25,10 +25,7 @@ class CityCollection:
         self.cities = cities
 
     def get_city_by_id(self, id: int):
-        size = len(self.cities)
-        if id > size:
-            raise IndexError(f"Cannot get city by id {id}. Max id = {size}")
-        return self.cities[id - 1]
+        return self.cities[id]
 
 
 

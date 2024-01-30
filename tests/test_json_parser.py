@@ -1,17 +1,38 @@
 from json_reader.json_parser import JSONParser
 from json_reader.builder import CityCollectionBuilder
 
+from utils.files_definition import FilePaths
+
+
 def test_parse_cities():
     parser = JSONParser()
-    cities = parser.read_cities_from_file("resource/test/test-city.json")
+    cities = parser.read_cities_from_file(FilePaths.TEST_CITIES_FILE)
+    validate_cities(cities)
+
+
+def test_city_collection_builder():
+    builder = CityCollectionBuilder(FilePaths.TEST_CITIES_FILE)
+    collection = builder.build()
+    validate_cities(collection.cities)
+
+
+def validate_cities(cities):
     assert len(cities) == 5
-
     ushuaia = cities[0]
+    validate_first_city(ushuaia)
 
-    assert ushuaia.id == 1
-    assert ushuaia.name == "Ushuaia"
-    assert ushuaia.country == "Argentina"
-    assert ushuaia.state == "Argentina, Tierra del Fuego"
-    assert ushuaia.lat == -54.799999
-    assert ushuaia.lon == -68.300003
-    assert ushuaia.population == 56825
+
+def validate_first_city(city):
+    assert city.id == 1
+    assert city.name == "Ushuaia"
+    assert city.country == "Argentina"
+    assert city.state == "Argentina, Tierra del Fuego"
+    assert city.lat == -54.799999
+    assert city.lon == -68.300003
+    assert city.population == 56825
+
+
+def test_search_by_id():
+    collection = CityCollectionBuilder(FilePaths.TEST_CITIES_FILE).build()
+    ushuaia = collection.get_city_by_id(1)
+    validate_first_city(ushuaia)
