@@ -3,7 +3,6 @@ import traceback
 import panel.widgets
 from ipyleaflet import Map
 import panel as pn
-import difflib
 from json_reader.autocomplete_helper import AutocompleteHelper
 from json_reader.builder import CityCollectionBuilder
 
