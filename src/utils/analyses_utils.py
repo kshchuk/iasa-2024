@@ -36,6 +36,19 @@ def print_statistics(data_frame: pd.DataFrame, features: list[str]):
     """
     print(data_frame[features].describe().transpose())
 
+
 class DataFrameType(Enum):
     Daily = auto()
     Hourly = auto()
+
+
+def prepare_data(df: pd.DataFrame, discrete_features: list[str]) -> pd.DataFrame:
+    """Interpolates missing continuous values and drop rows with missing discrete values.
+
+    :param df: (pd.DataFrame) Dataframe with features.
+    :param discrete_features: (list[str]) List of discrete features.
+    :return: (pd.DataFrame) Dataframe with interpolated continuous values and dropped rows with missing discrete values.
+    """
+    df = df.dropna(subset="weather_code")
+    df = df.interpolate(method="linear", limit_direction="both")
+    return df
