@@ -5,7 +5,7 @@ from retry_requests import retry
 import pandas as pd
 import openmeteo_requests
 
-from src.utils.analyses_utils import plot_features_evolution
+from src.utils.analyses_utils import plot_features_evolution, prepare_data
 from src.utils.analyses_utils import print_statistics
 from src.weather_prediction.prophet.prophet_daily_model import ProphetDailyModel
 
@@ -183,13 +183,26 @@ def main():
                       "sunshine_duration", "precipitation_sum", "precipitation_hours", "wind_speed_10m_max",
                       "wind_gusts_10m_max", "wind_direction_10m_dominant"]
 
-    date = weather_history["date"].tolist()
+
+
+    # date = weather_history["date"].tolist()
     # plot_features_evolution(weather_history, all_features, date)
     print_statistics(weather_history, all_features)
     daily_model = ProphetDailyModel()
+
+    regression_features = all_features.copy()
+    regression_features.remove("temperature_2m_mean")
+
+    weather_history = prepare_data(weather_history, ["weather_code", "wind_direction_10m_dominant"])
+
     daily_model.train(weather_history)
 
+    print("History:")
+    print(weather_history.tail())
 
+    forecast = daily_model.predict(7, weather_history[regression_features])
+    print("Forecast:")
+    print(forecast)
 
 
 if __name__ == "__main__":
