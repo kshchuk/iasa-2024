@@ -1,11 +1,10 @@
-from json_reader.json_parser import JSONParser
-from json_reader.city import CityInfo
-from json_reader.city import CountryInfo
-from json_reader.city import WorldMap
+from json_parser import JSONParser
+from city import CityInfo
+from city import CountryInfo
+from city import WorldMap
 
 
 class WorldMapBuilder:
-    default_continents_location = "resource/cities/continents.json"
     default_city_location = "resource/cities/history-city-list.json"
 
     def __init__(self, default_continents_location=None, default_cities_location=None):

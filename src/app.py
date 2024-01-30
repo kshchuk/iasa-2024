@@ -1,9 +1,20 @@
+import panel.widgets
 from ipyleaflet import Map
 import panel as pn
 
 pn.extension("ipywidgets", sizing_mode="stretch_width")
 
 ACCENT_BASE_COLOR = "#DAA520"
+
+
+class SearchBox:
+    def __init__(self):
+        self.word_list = []
+        self.search_field = panel.widgets.AutocompleteInput(
+            name='City', options=self.word_list,
+            case_sensitive=False, search_strategy='includes',
+            placeholder='Search city'
+        )
 
 
 class MapViewer:
@@ -38,10 +49,18 @@ class MapViewer:
 
 
 map_viewer = MapViewer()
+search_box = SearchBox()
 
-component = pn.Column(
+map_component = pn.Column(
     pn.panel(map_viewer.map, sizing_mode="stretch_both", min_height=500),
     map_viewer.json_widget
+)
+
+inputs_component = pn.Column(
+    pn.Row(search_box.search_field, height=100)
+)
+main_component = pn.Row(
+    map_component, inputs_component
 )
 
 template = pn.template.FastListTemplate(
@@ -49,5 +68,5 @@ template = pn.template.FastListTemplate(
     logo="https://panel.holoviz.org/_static/logo_stacked.png",
     header_background=ACCENT_BASE_COLOR,
     accent_base_color=ACCENT_BASE_COLOR,
-    main=[component],
+    main=[main_component],
 ).servable()
