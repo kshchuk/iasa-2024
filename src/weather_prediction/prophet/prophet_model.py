@@ -189,7 +189,7 @@ class ProphetWeatherPredictionModel:
         """
         future = pd.DataFrame()
         if df_type == DataFrameType.Daily:
-            future["ds"] = pd.date_range(start=start, periods=periods + 1, freq="D")[1:]
+            future["ds"] = pd.date_range(start=start, periods=periods, freq="D")
         elif df_type == DataFrameType.Hourly:
-            future["ds"] = pd.date_range(start=start, periods=periods + 1, freq="h")[1:]
+            future["ds"] = pd.date_range(start=start, periods=periods, freq="h")
         return future

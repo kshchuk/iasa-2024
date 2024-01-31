@@ -100,7 +100,7 @@ class WeatherPredictor:
 
         period = pd.to_datetime(end) - pd.to_datetime(start)
         start_date = pd.to_datetime(start)
-        return hourly_model.predict(period.days, start_date.__str__(), hourly_train_size)
+        return hourly_model.predict(period.days * 24, start_date.__str__(), hourly_train_size)
 
 
 pd.set_option('display.max_columns', None)
@@ -109,6 +109,6 @@ pd.set_option('display.max_colwidth', None)
 pd.set_option('display.width', None)
 
 predictor = WeatherPredictor()
-prediction = predictor.predict_weather(47.3769, 8.5417, "2021-01-01", hours=24, days=3)
+prediction = predictor.predict_weather(47.3769, 8.5417, "2021-01-01", hours=26, days=3)
 print(prediction["HOURLY"])
 print(prediction["DAILY"])
