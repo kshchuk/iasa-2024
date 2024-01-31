@@ -6,10 +6,13 @@ from prophet import Prophet
 from prophet.diagnostics import cross_validation, performance_metrics
 from sklearn.metrics import mean_absolute_error as MAE
 
-PREDICT_TO_HISTORY_RATIO = 0.2
+from utils.analyses_utils import DataFrameType
+
+# for testing, in the real prediction we use all dataset
+TRAIN_SIZE = 1000
 
 
-class ProphetDailyModel:
+class ProphetWeatherPredictionModel:
     """
     Prophet model. Used to predict all variables for the weather in the future.
 
@@ -17,15 +20,17 @@ class ProphetDailyModel:
     predicted using the predicted independent variables as regressors.
     """
 
-    def __init__(self, df: DataFrame, regressors: list[str]):
+    def __init__(self, df: DataFrame, df_type: DataFrameType, regressors: list[str], ):
         """
         Initialize Prophet model.
 
         :param df: (pd.DataFrame) Dataframe with features.
+        :param df_type: (DataFrameType) Type of the dataframe (Daily or Hourly)
         :param regressors: (list[str]) List of independent variables.
         """
         self._df = df
         self._regressors = regressors
+        self._df_type = df_type
 
     def validate(self) -> dict[str, DataFrame]:
         """
@@ -75,7 +80,7 @@ class ProphetDailyModel:
         :param periods: (int) Number of periods to predict.
         :return: (pd.DataFrame) Dataframe with predictions.
         """
-        future_with_regressors = self._create_empty_future(periods, start_date)
+        future_with_regressors = self._create_empty_future(periods, start_date, self._df_type)
         only_future = future_with_regressors[["ds"]].copy()
 
         # create a dictionary to hold the different independent variable forecasts
@@ -114,18 +119,19 @@ class ProphetDailyModel:
         return complete_future
 
     @staticmethod
-    def test(period: int, df: pd.DataFrame, regressors: list[str]) -> dict[str, dict[str, Any]]:
+    def test(period: int, df: pd.DataFrame, df_type: DataFrameType, regressors: list[str]) -> dict[str, dict[str, Any]]:
         """Test the prediction
 
         Currently, calculates the average MAE for each variable.
 
-        :param period: (int) Number of period to predict.
+        :param period: (int) Number of period to predict. (days)
         :param df: (pd.DataFrame) Dataframe with features.
+        :param df_type: (DataFrameType) Type of the dataframe (Daily or Hourly)
         :param regressors: (list[str]) List of independent variables.
         :return: (dict[str, dict[str, Any]]) Dictionary with validation metrics for each variable.
         """
         test_size = period
-        train_size = int(test_size / PREDICT_TO_HISTORY_RATIO)
+        train_size = TRAIN_SIZE
 
         testing_period_size = test_size + train_size
 
@@ -142,7 +148,7 @@ class ProphetDailyModel:
 
             start_ds = df.iloc[i + train_size - 1]["ds"]  # start forecasting from
 
-            model = ProphetDailyModel(train, regressors)
+            model = ProphetWeatherPredictionModel(train, df_type, regressors)
             forecast = model.predict(test_size, start_ds)
             predicted_date = forecast.iloc[-1]
 
@@ -159,13 +165,16 @@ class ProphetDailyModel:
         return metrics
 
     @staticmethod
-    def _create_empty_future(periods: int, start) -> pd.DataFrame:
+    def _create_empty_future(periods: int, start, df_type: DataFrameType) -> pd.DataFrame:
         """
         Create empty future dataframe.
 
-        :param periods: (int) Number of periods to generate.
+        :param periods: (int) Number of periods to predict.
         :return: (pd.DataFrame) Empty dataframe with future dates.
         """
         future = pd.DataFrame()
-        future["ds"] = pd.date_range(start=start, periods=periods + 1, freq="D")[1:]
+        if df_type == DataFrameType.Daily:
+            future["ds"] = pd.date_range(start=start, periods=periods + 1, freq="D")[1:]
+        elif df_type == DataFrameType.Hourly:
+            future["ds"] = pd.date_range(start=start, periods=periods + 1, freq="h")[1:]
         return future

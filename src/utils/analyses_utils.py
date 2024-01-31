@@ -41,6 +41,9 @@ class DataFrameType(Enum):
     Daily = auto()
     Hourly = auto()
 
+    def __eq__(self, other):
+        return self.value == other.value
+
 
 def prepare_data(df: pd.DataFrame, discrete_features: list[str]) -> pd.DataFrame:
     """Interpolates missing continuous values and drop rows with missing discrete values.

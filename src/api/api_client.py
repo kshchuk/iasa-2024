@@ -5,9 +5,24 @@ from retry_requests import retry
 import pandas as pd
 import openmeteo_requests
 
-from src.utils.analyses_utils import plot_features_evolution, prepare_data
+from src.utils.analyses_utils import plot_features_evolution, prepare_data, DataFrameType
 from src.utils.analyses_utils import print_statistics
-from src.weather_prediction.prophet.prophet_daily_model import ProphetDailyModel
+from src.weather_prediction.prophet.prophet_model import ProphetWeatherPredictionModel
+
+
+all_daily_features = ["weather_code", "temperature_2m_max", "temperature_2m_min", "temperature_2m_mean",
+                      "sunshine_duration", "precipitation_sum", "precipitation_hours", "wind_speed_10m_max",
+                      "wind_gusts_10m_max", "wind_direction_10m_dominant"]
+
+daily_discrete_features = ["weather_code", "wind_direction_10m_dominant"]
+daily_regressors = ["temperature_2m_mean", "precipitation_sum", "wind_speed_10m_max"]
+
+
+all_hourly_features = ["temperature_2m", "relative_humidity_2m", "precipitation", "weather_code", "surface_pressure",
+                       "cloud_cover", "wind_speed_10m", "wind_direction_10m", "wind_gusts_10m"]
+
+hourly_discrete_features = ["weather_code", "wind_direction_10m"]
+hourly_regressors = ["temperature_2m", "surface_pressure", "wind_speed_10m"]
 
 
 class ApiClient:
@@ -86,7 +101,7 @@ class ApiClient:
         daily_dataframe = pd.DataFrame(data=daily_data)
         return daily_dataframe
 
-    def get_hourly_data(self, lat: float, lon: float, start: str, end: str) -> DataFrame:
+    def get_hourly_weather_history(self, lat: float, lon: float, start: str, end: str) -> DataFrame:
         """
         Get hourly weather history for specific location.
 
@@ -171,37 +186,30 @@ def main():
     args = parser.parse_args()
 
     api_client = ApiClient()
-    weather_history = api_client.get_daily_weather_history(args.lat, args.lon, args.start, args.end)
+    weather_history = api_client.get_hourly_weather_history(args.lat, args.lon, args.start, args.end)
     pd.set_option('display.max_columns', None)
 
     pd.set_option('display.max_colwidth', None)
     pd.set_option('display.width', None)
 
     print(weather_history.head())
-
-    all_features = ["weather_code", "temperature_2m_max", "temperature_2m_min", "temperature_2m_mean",
-                    "sunshine_duration", "precipitation_sum", "precipitation_hours", "wind_speed_10m_max",
-                    "wind_gusts_10m_max", "wind_direction_10m_dominant"]
+    print(weather_history.tail())
 
     # date = weather_history["date"].tolist()
-    # plot_features_evolution(weather_history, all_features, date)
-    print_statistics(weather_history, all_features)
+    # plot_features_evolution(weather_history, all_hourly_features, date)
+    print_statistics(weather_history, all_hourly_features)
 
-    regressors = ["temperature_2m_mean", "precipitation_sum", "wind_speed_10m_max"]
-    discrete_features = ["weather_code", "wind_direction_10m_dominant"]
+    weather_history = prepare_data(weather_history, hourly_discrete_features)
 
-    weather_history = prepare_data(weather_history, discrete_features)
+    hourly_model = ProphetWeatherPredictionModel(weather_history, DataFrameType.Hourly, hourly_regressors)
 
-    daily_model = ProphetDailyModel(weather_history, regressors)
+    #print(hourly_model.validate())
 
-    # print(daily_model.validate())
-
-    forecast = daily_model.predict(7, weather_history["ds"].max())
+    forecast = hourly_model.predict(24, weather_history["ds"].max())
     print("Forecast:")
     print(forecast)
 
-    print(ProphetDailyModel.test(7, weather_history, regressors))
-
+    print(ProphetWeatherPredictionModel.test(24, weather_history, DataFrameType.Hourly, hourly_regressors))
 
 if __name__ == "__main__":
     main()
