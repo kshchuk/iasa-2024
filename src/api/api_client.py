@@ -205,11 +205,11 @@ def main():
 
     #print(hourly_model.validate())
 
-    forecast = hourly_model.predict(24, weather_history["ds"].max())
+    forecast = hourly_model.predict(24, weather_history["ds"].max(), 1000)
     print("Forecast:")
     print(forecast)
 
-    print(ProphetWeatherPredictionModel.test(24, weather_history, DataFrameType.Hourly, hourly_regressors))
+    print(ProphetWeatherPredictionModel.test(24, weather_history, DataFrameType.Hourly, hourly_regressors, 1000))
 
 if __name__ == "__main__":
     main()

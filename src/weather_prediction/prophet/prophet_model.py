@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Any
 
 import pandas as pd
 from pandas import DataFrame
@@ -7,9 +7,6 @@ from prophet.diagnostics import cross_validation, performance_metrics
 from sklearn.metrics import mean_absolute_error as MAE
 
 from utils.analyses_utils import DataFrameType
-
-# for testing, in the real prediction we use all dataset
-TRAIN_SIZE = 1000
 
 
 class ProphetWeatherPredictionModel:
@@ -20,7 +17,7 @@ class ProphetWeatherPredictionModel:
     predicted using the predicted independent variables as regressors.
     """
 
-    def __init__(self, df: DataFrame, df_type: DataFrameType, regressors: list[str], ):
+    def __init__(self, df: DataFrame, df_type: DataFrameType, regressors: list[str]):
         """
         Initialize Prophet model.
 
@@ -69,7 +66,7 @@ class ProphetWeatherPredictionModel:
 
         return metrics
 
-    def predict(self, periods: int, start_date: str) -> pd.DataFrame:
+    def predict(self, periods: int, start_date: str, train_size: int) -> pd.DataFrame:
         """
         Predict using Prophet model.
 
@@ -77,15 +74,28 @@ class ProphetWeatherPredictionModel:
         using the predicted independent variables as regressors.
 
         :param start_date: (str) Start date for the prediction.
-        :param periods: (int) Number of periods to predict.
+        :param periods: (int) Number of periods to predict. (hours or days)
+        :param train_size: (int) Number of periods to use for training.
         :return: (pd.DataFrame) Dataframe with predictions.
+        :raises ValueError: If the DataFrameType is unknown.
         """
+        if self._df_type == DataFrameType.Daily:
+            start_train_date = pd.to_datetime(start_date) - pd.DateOffset(days=train_size)
+            end_train_date = pd.to_datetime(start_date) - pd.DateOffset(days=1)
+        elif self._df_type == DataFrameType.Hourly:
+            start_train_date = pd.to_datetime(start_date) - pd.DateOffset(hours=train_size)
+            end_train_date = pd.to_datetime(start_date) - pd.DateOffset(hours=1)
+        else:
+            raise ValueError("Unknown DataFrameType")
+
+        train_data = self._df[(self._df["ds"] >= start_train_date) & (self._df["ds"] <= end_train_date)]
+
         future_with_regressors = self._create_empty_future(periods, start_date, self._df_type)
         only_future = future_with_regressors[["ds"]].copy()
 
         # create a dictionary to hold the different independent variable forecasts
         for regressor in self._regressors:
-            train = self._df[["ds", regressor]].copy()
+            train = train_data[["ds", regressor]].copy()
             train = train.rename(columns={regressor: "y"})
 
             # create a new Prophet model
@@ -102,14 +112,14 @@ class ProphetWeatherPredictionModel:
 
         other_variables = [column for column in self._df.columns if column not in self._regressors and column != "ds"]
         for variable in other_variables:
-            train = self._df[["ds", variable]].copy()
+            train = train_data[["ds", variable]].copy()
             train = train.rename(columns={variable: "y"})
 
             # create a new Prophet models
             variable_model = Prophet()
             for regressor in self._regressors:
                 variable_model.add_regressor(regressor)
-                train[regressor] = self._df[regressor]
+                train[regressor] = train_data[regressor]
             variable_model.fit(train)
 
             variable_future = variable_model.predict(future_with_regressors)
@@ -119,19 +129,24 @@ class ProphetWeatherPredictionModel:
         return complete_future
 
     @staticmethod
-    def test(period: int, df: pd.DataFrame, df_type: DataFrameType, regressors: list[str]) -> dict[str, dict[str, Any]]:
+    def test(period: int,
+             df: pd.DataFrame, df_type: DataFrameType,
+             regressors: list[str],
+             train_size: int = 100) -> dict[str, dict[str, Any]]:
+
         """Test the prediction
 
-        Currently, calculates the average MAE for each variable.
+        Currently, calculates the average MAE for each variable by splitting the dataset
+        into chunks of size (train_size + period) and predicting the next period.
 
         :param period: (int) Number of period to predict. (days)
         :param df: (pd.DataFrame) Dataframe with features.
         :param df_type: (DataFrameType) Type of the dataframe (Daily or Hourly)
         :param regressors: (list[str]) List of independent variables.
+        :param train_size: (int) Number of periods to use for training.
         :return: (dict[str, dict[str, Any]]) Dictionary with validation metrics for each variable.
         """
         test_size = period
-        train_size = TRAIN_SIZE
 
         testing_period_size = test_size + train_size
 
@@ -149,7 +164,7 @@ class ProphetWeatherPredictionModel:
             start_ds = df.iloc[i + train_size - 1]["ds"]  # start forecasting from
 
             model = ProphetWeatherPredictionModel(train, df_type, regressors)
-            forecast = model.predict(test_size, start_ds)
+            forecast = model.predict(test_size, start_ds, train_size)
             predicted_date = forecast.iloc[-1]
 
             assert test_date["ds"] == predicted_date["ds"]
