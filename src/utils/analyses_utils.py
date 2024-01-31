@@ -38,15 +38,15 @@ def print_statistics(data_frame: pd.DataFrame, features: list[str]):
 
 
 class DataFrameType(Enum):
-    Daily = auto()
-    Hourly = auto()
+    Daily = "DAILY"
+    Hourly = "HOURLY"
 
     def __eq__(self, other):
         return self.value == other.value
 
 
 def prepare_data(df: pd.DataFrame, discrete_features: list[str]) -> pd.DataFrame:
-    """Interpolates missing continuous values and drop rows with missing discrete values.
+    """Interpolates missing continuous values and drops rows with missing discrete values.
 
     :param df: (pd.DataFrame) Dataframe with features.
     :param discrete_features: (list[str]) List of discrete features.

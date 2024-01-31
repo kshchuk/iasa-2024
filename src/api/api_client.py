@@ -8,21 +8,7 @@ import openmeteo_requests
 from src.utils.analyses_utils import plot_features_evolution, prepare_data, DataFrameType
 from src.utils.analyses_utils import print_statistics
 from src.weather_prediction.prophet.prophet_model import ProphetWeatherPredictionModel
-
-
-all_daily_features = ["weather_code", "temperature_2m_max", "temperature_2m_min", "temperature_2m_mean",
-                      "sunshine_duration", "precipitation_sum", "precipitation_hours", "wind_speed_10m_max",
-                      "wind_gusts_10m_max", "wind_direction_10m_dominant"]
-
-daily_discrete_features = ["weather_code", "wind_direction_10m_dominant"]
-daily_regressors = ["temperature_2m_mean", "precipitation_sum", "wind_speed_10m_max"]
-
-
-all_hourly_features = ["temperature_2m", "relative_humidity_2m", "precipitation", "weather_code", "surface_pressure",
-                       "cloud_cover", "wind_speed_10m", "wind_direction_10m", "wind_gusts_10m"]
-
-hourly_discrete_features = ["weather_code", "wind_direction_10m"]
-hourly_regressors = ["temperature_2m", "surface_pressure", "wind_speed_10m"]
+from weather_prediction.features import all_hourly_features, hourly_discrete_features, hourly_regressors
 
 
 class ApiClient:
@@ -31,7 +17,7 @@ class ApiClient:
     """
 
     def __init__(self):
-        # Setup the Open-Meteo API client with cache and retry on error
+        # Set up the Open-Meteo API client with cache and retry on error
         self._cache_session = requests_cache.CachedSession('.cache', expire_after=-1)
         self._retry_session = retry(self._cache_session, retries=5, backoff_factor=0.2)
         self._openmeteo = openmeteo_requests.Client(session=self._retry_session)
@@ -203,13 +189,14 @@ def main():
 
     hourly_model = ProphetWeatherPredictionModel(weather_history, DataFrameType.Hourly, hourly_regressors)
 
-    #print(hourly_model.validate())
+    # print(hourly_model.validate())
 
     forecast = hourly_model.predict(24, weather_history["ds"].max(), 1000)
     print("Forecast:")
     print(forecast)
 
     print(ProphetWeatherPredictionModel.test(24, weather_history, DataFrameType.Hourly, hourly_regressors, 1000))
+
 
 if __name__ == "__main__":
     main()
