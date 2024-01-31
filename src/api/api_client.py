@@ -180,29 +180,27 @@ def main():
     print(weather_history.head())
 
     all_features = ["weather_code", "temperature_2m_max", "temperature_2m_min", "temperature_2m_mean",
-                      "sunshine_duration", "precipitation_sum", "precipitation_hours", "wind_speed_10m_max",
-                      "wind_gusts_10m_max", "wind_direction_10m_dominant"]
-
-
+                    "sunshine_duration", "precipitation_sum", "precipitation_hours", "wind_speed_10m_max",
+                    "wind_gusts_10m_max", "wind_direction_10m_dominant"]
 
     # date = weather_history["date"].tolist()
     # plot_features_evolution(weather_history, all_features, date)
     print_statistics(weather_history, all_features)
-    daily_model = ProphetDailyModel()
 
-    regression_features = all_features.copy()
-    regression_features.remove("temperature_2m_mean")
+    regressors = ["temperature_2m_mean", "precipitation_sum", "wind_speed_10m_max"]
+    discrete_features = ["weather_code", "wind_direction_10m_dominant"]
 
-    weather_history = prepare_data(weather_history, ["weather_code", "wind_direction_10m_dominant"])
+    weather_history = prepare_data(weather_history, discrete_features)
 
-    daily_model.train(weather_history)
+    daily_model = ProphetDailyModel(weather_history, regressors)
 
-    print("History:")
-    print(weather_history.tail())
+    # print(daily_model.validate())
 
-    forecast = daily_model.predict(7, weather_history[regression_features])
+    forecast = daily_model.predict(7, weather_history["ds"].max())
     print("Forecast:")
     print(forecast)
+
+    print(ProphetDailyModel.test(7, weather_history, regressors))
 
 
 if __name__ == "__main__":

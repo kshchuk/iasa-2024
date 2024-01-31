@@ -49,6 +49,7 @@ def prepare_data(df: pd.DataFrame, discrete_features: list[str]) -> pd.DataFrame
     :param discrete_features: (list[str]) List of discrete features.
     :return: (pd.DataFrame) Dataframe with interpolated continuous values and dropped rows with missing discrete values.
     """
-    df = df.dropna(subset="weather_code")
+    df = df.rename(columns={"date": "ds"})
+    df = df.dropna(subset=discrete_features)
     df = df.interpolate(method="linear", limit_direction="both")
     return df
