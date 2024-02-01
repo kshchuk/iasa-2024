@@ -76,8 +76,9 @@ class SearchBox:
 class OptionsBox:
     def __init__(self):
         current_date = datetime.date.today()
-        self.from_date_picker = pn.widgets.DatePicker(name='From', end=current_date)
-        self.to_date_picker = pn.widgets.DatePicker(name='To', end=current_date)
+        seven_days_ago = current_date - datetime.timedelta(days=7)
+        self.from_date_picker = pn.widgets.DatePicker(name='From', end=current_date,value=seven_days_ago)
+        self.to_date_picker = pn.widgets.DatePicker(name='To', end=current_date,value=current_date)
         self.prediction_type = pn.widgets.Select(name='Type', options=['Daily', 'Hourly'])
         self.options_row = pn.Row(
             self.from_date_picker,
