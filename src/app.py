@@ -64,6 +64,14 @@ class SearchBox:
             self.affected_map.map.zoom = 5
             self.affected_map.update_map(city.lat, city.lon)
 
+    @staticmethod
+    def init_autocomplete_helper():
+        try:
+            return CityCollectionBuilder().build_map()
+        except Exception as e:
+            print("Error while creating AutoCompleteHelper:", e)
+            traceback.print_exc()
+            return AutocompleteHelper()
 
 class OptionsBox:
     def __init__(self):
@@ -84,14 +92,7 @@ class OptionsBox:
             'type': self.prediction_type.value
         }
 
-    @staticmethod
-    def init_autocomplete_helper():
-        try:
-            return CityCollectionBuilder().build_map()
-        except Exception as e:
-            print("Error while creating AutoCompleteHelper:", e)
-            traceback.print_exc()
-            return AutocompleteHelper()
+
 
 
 map_viewer = MapViewer()
