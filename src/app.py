@@ -61,7 +61,7 @@ class SearchBox:
         city = autocomplete_helper.find_by_key(current_input)
         if self.affected_map:
             self.affected_map.map.center = (city.lat, city.lon)
-            self.affected_map.map.zoom = 5
+            self.affected_map.map.zoom = 8
             self.affected_map.update_map(city.lat, city.lon)
 
     @staticmethod
