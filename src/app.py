@@ -3,6 +3,7 @@ import traceback
 import panel.widgets
 from ipyleaflet import Map
 import panel as pn
+
 from json_reader.autocomplete_helper import AutocompleteHelper
 from json_reader.builder import CityCollectionBuilder
 
@@ -11,44 +12,38 @@ pn.extension("ipywidgets", sizing_mode="stretch_width")
 ACCENT_BASE_COLOR = "#DAA520"
 
 
-
-
-
 class MapViewer:
-    def __init__(self):
-        self.map = None
-        self.json_widget = None
-        self.current_points = (0, 0)
-        self.create_map()
-        self.create_widgets()
-        self.setup_interaction()
+    start_point: tuple[int, int] = (50.45, 30.52)
 
-    def create_map(self):
-        center = (50.45, 30.52)
-        self.map = Map(center=center, zoom=5, height=500)
+    def __init__(self):
+        self.map: Map = Map(center=self.start_point, zoom=5, height=500,
+                            scroll_wheel_zoom=True)
+        self.json_widget: pn.pane.JSON = pn.pane.JSON({}, height=75)
+        self.current_point: tuple[int, int] = (0, 0)
+
         self.map.layout.height = "100%"
         self.map.layout.width = "100%"
-
-    def create_widgets(self):
-        self.json_widget = pn.pane.JSON({}, height=75)
-
-    def setup_interaction(self):
         self.map.on_interaction(self.handler)
+
+    def update_map(self, latitude, longitude):
+        Map.default_style = {'cursor': 'wait'}
+        self.current_point = (latitude, longitude)
+        self.json_widget.object = {"x": self.current_point[0],
+                                   "y": self.current_point[1]}
+        Map.default_style = {'cursor': 'pointer'}
 
     def handler(self, **kwargs):
         if kwargs.get('type') == 'click':
             latlon = kwargs.get('coordinates')
-            Map.default_style = {'cursor': 'wait'}
-            self.current_points = latlon
-            self.json_widget.object = {"x": self.current_points[0],
-                                       "y": self.current_points[1]}
-            Map.default_style = {'cursor': 'pointer'}
+            self.update_map(latlon[0], latlon[1])
+
 
 class SearchBox:
     affected_map = None
     autocomplete_helper = None
 
-    def __init__(self, autocomplete_helper: AutocompleteHelper, affected_map:MapViewer=None):
+    def __init__(self, autocomplete_helper: AutocompleteHelper,
+                 affected_map: MapViewer = None):
         self.autocomplete_helper = autocomplete_helper
         self.affected_map = affected_map
         self.search_field = panel.widgets.AutocompleteInput(
@@ -57,15 +52,20 @@ class SearchBox:
             placeholder='Search city',
             min_characters=2
         )
-        self.search_field.param.watch(self.update_options, 'value', onlychanged=False)
+        self.search_field.param.watch(self.update_options, 'value',
+                                      onlychanged=False)
 
     def update_options(self, event):
         current_input = event.new
-        if current_input== '':
+        if current_input == '':
             return
         city = autocomplete_helper.find_by_key(current_input)
         if self.affected_map:
             self.affected_map.map.center = (city.lat, city.lon)
+            self.affected_map.map.zoom = 5
+            self.affected_map.update_map(city.lat, city.lon)
+
+
 def init_autocomplete_helper():
     try:
         return CityCollectionBuilder().build_map()
@@ -92,8 +92,8 @@ main_component = pn.Row(
 )
 
 template = pn.template.FastListTemplate(
-    title="IPyLeaflet",
-    logo="https://panel.holoviz.org/_static/logo_stacked.png",
+    title="WeatherCast",
+    logo="https://i.imgur.com/7NenPSk.png",
     header_background=ACCENT_BASE_COLOR,
     accent_base_color=ACCENT_BASE_COLOR,
     main=[main_component],
