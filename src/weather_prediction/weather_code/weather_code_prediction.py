@@ -98,26 +98,6 @@ class WeatherCodesPredictor:
             99: 'thunderstorm',
         }
 
-        replace_dict = {
-            2: 1,
-            3: 1,
-            45: 48,
-            53: 51,
-            55: 51,
-            56: 51,
-            57: 51,
-            63: 61,
-            65: 61,
-            66: 61,
-            67: 61,
-            73: 71,
-            75: 71,
-            81: 80,
-            82: 80,
-            85: 86,
-            96: 95,
-            99: 95
-        }
         y_mapped = y.map(replacements).fillna('unknown')
         return y_mapped.astype(str)
 
