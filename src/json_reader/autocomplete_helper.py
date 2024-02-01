@@ -7,7 +7,7 @@ class AutocompleteHelper:
     def load_from(self, cities_collection: CityCollection):
         self.map = {}
         cities = cities_collection.get_all()
-        cities = sorted(cities, key=lambda city: city.population)
+        cities = sorted(cities, key=lambda city: city.population, reverse=True)
         for city in cities:
             try:
                 key = city.name + ", " + city.state
