@@ -1,12 +1,13 @@
-from json_reader.city import CityCollection
+from json_reader.city import CityCollection, CityInfo
 
 
 class AutocompleteHelper:
-    map = {}
+    map: dict[str, CityInfo] = {}
 
     def load_from(self, cities_collection: CityCollection):
         self.map = {}
         cities = cities_collection.get_all()
+        cities = sorted(cities, key=lambda city: city.population)
         for city in cities:
             try:
                 key = city.name + ", " + city.state
