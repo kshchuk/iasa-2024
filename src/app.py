@@ -5,7 +5,6 @@ from ipyleaflet import Map
 import panel as pn
 
 import datetime
-
 from json_reader.autocomplete_helper import AutocompleteHelper
 from json_reader.builder import CityCollectionBuilder
 
@@ -28,11 +27,9 @@ class MapViewer:
         self.map.on_interaction(self.handler)
 
     def update_map(self, latitude, longitude):
-        Map.default_style = {'cursor': 'wait'}
         self.current_point = (latitude, longitude)
         self.json_widget.object = {"x": self.current_point[0],
                                    "y": self.current_point[1]}
-        Map.default_style = {'cursor': 'pointer'}
 
     def handler(self, **kwargs):
         if kwargs.get('type') == 'click':
@@ -87,18 +84,18 @@ class OptionsBox:
             'type': self.prediction_type.value
         }
 
-
-def init_autocomplete_helper():
-    try:
-        return CityCollectionBuilder().build_map()
-    except Exception as e:
-        print("Error while creating AutoCompleteHelper:", e)
-        traceback.print_exc()
-        return AutocompleteHelper()
+    @staticmethod
+    def init_autocomplete_helper():
+        try:
+            return CityCollectionBuilder().build_map()
+        except Exception as e:
+            print("Error while creating AutoCompleteHelper:", e)
+            traceback.print_exc()
+            return AutocompleteHelper()
 
 
 map_viewer = MapViewer()
-autocomplete_helper = init_autocomplete_helper()
+autocomplete_helper = SearchBox.init_autocomplete_helper()
 search_box = SearchBox(autocomplete_helper, map_viewer)
 options_box = OptionsBox()
 
