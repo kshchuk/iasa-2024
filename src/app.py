@@ -26,11 +26,9 @@ class MapViewer:
         self.map.on_interaction(self.handler)
 
     def update_map(self, latitude, longitude):
-        Map.default_style = {'cursor': 'wait'}
         self.current_point = (latitude, longitude)
         self.json_widget.object = {"x": self.current_point[0],
                                    "y": self.current_point[1]}
-        Map.default_style = {'cursor': 'pointer'}
 
     def handler(self, **kwargs):
         if kwargs.get('type') == 'click':
@@ -62,21 +60,21 @@ class SearchBox:
         city = autocomplete_helper.find_by_key(current_input)
         if self.affected_map:
             self.affected_map.map.center = (city.lat, city.lon)
-            self.affected_map.map.zoom = 5
+            self.affected_map.map.zoom = 8
             self.affected_map.update_map(city.lat, city.lon)
 
-
-def init_autocomplete_helper():
-    try:
-        return CityCollectionBuilder().build_map()
-    except Exception as e:
-        print("Error while creating AutoCompleteHelper:", e)
-        traceback.print_exc()
-        return AutocompleteHelper()
+    @staticmethod
+    def init_autocomplete_helper():
+        try:
+            return CityCollectionBuilder().build_map()
+        except Exception as e:
+            print("Error while creating AutoCompleteHelper:", e)
+            traceback.print_exc()
+            return AutocompleteHelper()
 
 
 map_viewer = MapViewer()
-autocomplete_helper = init_autocomplete_helper()
+autocomplete_helper = SearchBox.init_autocomplete_helper()
 search_box = SearchBox(autocomplete_helper, map_viewer)
 
 map_component = pn.Column(
@@ -97,4 +95,6 @@ template = pn.template.FastListTemplate(
     header_background=ACCENT_BASE_COLOR,
     accent_base_color=ACCENT_BASE_COLOR,
     main=[main_component],
-).servable()
+)
+
+pn.serve(template)
