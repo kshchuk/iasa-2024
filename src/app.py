@@ -73,12 +73,13 @@ class SearchBox:
             traceback.print_exc()
             return AutocompleteHelper()
 
+
 class OptionsBox:
     def __init__(self):
         current_date = datetime.date.today()
         seven_days_ago = current_date - datetime.timedelta(days=7)
-        self.from_date_picker = pn.widgets.DatePicker(name='From', end=current_date,value=seven_days_ago)
-        self.to_date_picker = pn.widgets.DatePicker(name='To', end=current_date,value=current_date)
+        self.from_date_picker = pn.widgets.DatePicker(name='From', end=current_date, value=seven_days_ago)
+        self.to_date_picker = pn.widgets.DatePicker(name='To', end=current_date, value=current_date)
         self.prediction_type = pn.widgets.Select(name='Type', options=['Daily', 'Hourly'])
         self.options_row = pn.Row(
             self.from_date_picker,
@@ -88,12 +89,44 @@ class OptionsBox:
 
     def collect_data(self):
         return {
-            'from': self.from_date_picker.value,
-            'to': self.to_date_picker.value,
+            'from': self._format_date_value(self.from_date_picker),
+            'to': self._format_date_value(self.to_date_picker),
             'type': self.prediction_type.value
         }
 
+    def _format_date_value(self, date_picker: pn.widgets.DatePicker):
+        selected_date = date_picker.value
+        return selected_date.strftime('%Y-%m-%d') if selected_date else ''
 
+
+class UserInputCollector:
+    def __init__(self, map_viewer: MapViewer, options_box: OptionsBox):
+        self.map_viewer = map_viewer
+        self.options_box = options_box
+
+    def user_input(self):
+        return UserInputCollector.collect_user_input(self.map_viewer, self.options_box)
+
+    @staticmethod
+    def collect_user_input(clt_viewer: MapViewer, clt_options: OptionsBox):
+        """
+
+        :param clt_viewer: map viewer to collect input from
+        :param clt_options: options box to collect input from
+        :return: dictionary, that includes:
+        lon = selected point longitude (uses start point in not selected)
+        lat = selected point latitude (uses start point in not selected)
+        from = start date (yyyy-mm-dd), empty string if not selected
+        to = end date (yyyy-mm-dd), empty string if not selected
+        type = 'Daily' or 'Hourly'
+        """
+        collected_input = clt_options.collect_data()
+        current_coords = clt_viewer.current_point
+        if not current_coords:
+            current_coords = map_viewer.start_point
+        collected_input["lon"] = current_coords[0]
+        collected_input["lat"] = current_coords[1]
+        return collected_input
 
 
 map_viewer = MapViewer()
