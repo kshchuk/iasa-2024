@@ -4,6 +4,8 @@ import panel.widgets
 from ipyleaflet import Map
 import panel as pn
 
+import datetime
+
 from json_reader.autocomplete_helper import AutocompleteHelper
 from json_reader.builder import CityCollectionBuilder
 
@@ -66,6 +68,26 @@ class SearchBox:
             self.affected_map.update_map(city.lat, city.lon)
 
 
+class OptionsBox:
+    def __init__(self):
+        current_date = datetime.date.today()
+        self.from_date_picker = pn.widgets.DatePicker(name='From', end=current_date)
+        self.to_date_picker = pn.widgets.DatePicker(name='To', end=current_date)
+        self.prediction_type = pn.widgets.Select(name='Type', options=['Daily', 'Hourly'])
+        self.options_row = pn.Row(
+            self.from_date_picker,
+            self.to_date_picker,
+            self.prediction_type
+        )
+
+    def collect_data(self):
+        return {
+            'from': self.from_date_picker.value,
+            'to': self.to_date_picker.value,
+            'type': self.prediction_type.value
+        }
+
+
 def init_autocomplete_helper():
     try:
         return CityCollectionBuilder().build_map()
@@ -78,6 +100,7 @@ def init_autocomplete_helper():
 map_viewer = MapViewer()
 autocomplete_helper = init_autocomplete_helper()
 search_box = SearchBox(autocomplete_helper, map_viewer)
+options_box = OptionsBox()
 
 map_component = pn.Column(
     pn.panel(map_viewer.map, sizing_mode="stretch_both", min_height=500),
@@ -85,7 +108,8 @@ map_component = pn.Column(
 )
 
 inputs_component = pn.Column(
-    pn.Row(search_box.search_field, height=100)
+    pn.Row(search_box.search_field, height=100),
+    pn.Row(options_box.options_row, height=100)
 )
 main_component = pn.Row(
     map_component, inputs_component
