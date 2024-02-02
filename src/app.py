@@ -106,11 +106,11 @@ class OptionsBox:
         current_date = datetime.date.today()
         common_width = 150
         common_height = 50
-
+        min_date = datetime.datetime.strptime("1985-01-01", "%Y-%m-%d").date()
         seven_days_ago = current_date - datetime.timedelta(days=7)
-        self.from_date_picker = pn.widgets.DatePicker(name='From', end=current_date, value=seven_days_ago,
+        self.from_date_picker = pn.widgets.DatePicker(name='From', start=min_date, end=current_date, value=seven_days_ago,
                                                       width=common_width, height=common_height)
-        self.to_date_picker = pn.widgets.DatePicker(name='To', end=current_date, value=current_date,
+        self.to_date_picker = pn.widgets.DatePicker(name='To', start=min_date, end=current_date, value=current_date,
                                                     width=common_width, height=common_height)
         self.prediction_type = pn.widgets.Select(name='Type', options=['Daily', 'Hourly'],
                                                  width=common_width, height=common_height)
