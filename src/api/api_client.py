@@ -162,17 +162,17 @@ def main():
     )
     parser.add_argument(
         "--start", help="Start time (ISO 8601) ",
-        required=False, dest="start", default="2021-01-26"
+        required=False, dest="start", default="2000-01-26"
     )
     parser.add_argument(
         "--end", help="End time (ISO 8601) ",
-        required=False, dest="end", default="2024-01-26"
+        required=False, dest="end", default="2020-01-26"
     )
 
     args = parser.parse_args()
 
     api_client = ApiClient()
-    weather_history = api_client.get_hourly_weather_history(args.lat, args.lon, args.start, args.end)
+    weather_history = api_client.get_daily_weather_history(args.lat, args.lon, args.start, args.end)
     pd.set_option('display.max_columns', None)
 
     pd.set_option('display.max_colwidth', None)
@@ -181,21 +181,24 @@ def main():
     print(weather_history.head())
     print(weather_history.tail())
 
+    # save data to the csv file
+    weather_history.to_csv("daily_weather_history_kyiv_2000-01-26-to-2020-01-26.csv")
+
     # date = weather_history["date"].tolist()
     # plot_features_evolution(weather_history, all_hourly_features, date)
-    print_statistics(weather_history, all_hourly_features)
+    # print_statistics(weather_history, all_hourly_features)
 
-    weather_history = prepare_data(weather_history, hourly_discrete_features)
+    # weather_history = prepare_data(weather_history, hourly_discrete_features)
 
-    hourly_model = ProphetWeatherPredictionModel(weather_history, DataFrameType.Hourly, hourly_regressors)
+    # hourly_model = ProphetWeatherPredictionModel(weather_history, DataFrameType.Hourly, hourly_regressors)
 
     # print(hourly_model.validate())
 
-    forecast = hourly_model.predict(24, weather_history["ds"].max(), 1000)
-    print("Forecast:")
-    print(forecast)
+    # forecast = hourly_model.predict(24, weather_history["ds"].max(), 1000)
+    # print("Forecast:")
+    # print(forecast)
 
-    print(ProphetWeatherPredictionModel.test(24, weather_history, DataFrameType.Hourly, hourly_regressors, 1000))
+    # print(ProphetWeatherPredictionModel.test(24, weather_history, DataFrameType.Hourly, hourly_regressors, 1000))
 
 
 if __name__ == "__main__":
