@@ -25,7 +25,7 @@ class MapViewer:
         self.map: Map = Map(center=self.start_point, zoom=5, height=500,
                             scroll_wheel_zoom=True)
         self.current_point: tuple[float, float] = self.start_point
-        self.marker: Marker = Marker(location=self.start_point, visible=True)
+        self.marker: Marker = Marker(location=self.start_point, visible=True, draggable=False)
         self.map.add(self.marker)
         self.json_widget: pn.pane.JSON = pn.pane.JSON({}, height=75)
 
