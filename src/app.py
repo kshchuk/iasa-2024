@@ -8,7 +8,10 @@ import datetime
 from json_reader.autocomplete_helper import AutocompleteHelper
 from json_reader.builder import CityCollectionBuilder
 from display_results import display_mock_data
+from display_results import build_results_widget
 from dynamic import DynamicContentHolder
+
+from forecast.forecast import WeatherForecast
 
 pn.extension("ipywidgets", sizing_mode="stretch_width")
 
@@ -185,8 +188,9 @@ def build_weather_forecast(event):
     if not event:
         return
     user_input = UserInputCollector.collect_user_input(map_viewer, options_box)
-    print(user_input)  # Use in weather forecast
-    list_widget, plots_widget = display_mock_data()
+
+    prediction = WeatherForecast().predict(user_input)
+    list_widget, plots_widget = build_results_widget(prediction, prediction)
     result_list.set_content(list_widget)
     graphs_list.set_content(plots_widget)
 
