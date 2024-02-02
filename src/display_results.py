@@ -52,7 +52,7 @@ def display_mock_data():
             "type": "clear"
         },
     ]
-    return build_results_widget(actual_weather, predicted_weather,
+    return build_results_widget(pd.DataFrame(actual_weather), pd.DataFrame(predicted_weather),
                                 ["temperature", "pressure", "wind_speed", "type"],
                                 ["Temperature", "Pressure", "Wind Speed", "Weather Type"])
 
@@ -109,7 +109,7 @@ def _create_plot_matplot(dates, column_actual_data, column_predicted_data, title
     return fig
 
 
-def _build_result_list_widget(actual_weather, predicted_weather, use_columns, column_names, date_column):
+def _build_result_list_widget(actual_weather, predicted_weather, use_columns, column_names, date_column='date'):
     def_styles = """
         <style>
             table {
@@ -136,7 +136,7 @@ def _build_result_list_widget(actual_weather, predicted_weather, use_columns, co
     for (_, actual_w), (_, predicted_w) in zip(actual_weather.iterrows(), predicted_weather.iterrows()):
         date_rowspan = f'rowspan="{len(column_names) + 1}"'
 
-        html += f'<tr><td {date_rowspan} style="vertical-align: middle;"><b>{actual_w["date"]}</b></td></tr>'
+        html += f'<tr><td {date_rowspan} style="vertical-align: middle;"><b>{actual_w[date_column]}</b></td></tr>'
         for column_name, pretty_name in zip(use_columns, column_names):
             html += '<tr>'
             html += f'<td>{pretty_name}</td>'
@@ -160,6 +160,7 @@ def _replace_plot(event, dynamic_plot, plots):
 def _build_plots_widget(actual_weather, predicted_weather, use_columns, column_names, date_column):
     plots = {}
     dates = _extract_column(actual_weather, date_column)
+    dates = [date.strftime("%y-%m-%d") for date in dates]
     options = column_names
     for column_name, pretty_name in zip(use_columns, column_names):
         column_actual_data = _extract_column(actual_weather, column_name)

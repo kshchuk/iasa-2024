@@ -10,6 +10,10 @@ class WeatherForecast:
         self.weather_code_predictor = WeatherCodesPredictor()
         self.include_regressors_daily = ['temperature_2m_mean', 'wind_speed_10m_max',
                                          'precipitation_sum', 'precipitation_hours']
+        self.include_regressors_hourly = [
+            'temperature_2m', 'relative_humidity_2m', 'precipitation', 'cloud_cover', 'surface_pressure',
+            'wind_speed_10m'
+        ]
 
     def predict(self, user_input):
         if user_input['type'] == 'Hourly':
@@ -40,18 +44,20 @@ class WeatherForecast:
         return datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
 
     def _get_for_hours(self, lat, lon, start_date_str, distance_days):
-        prediction_dict = (self.weather_predictor.
-                           predict_weather(lat, lon, start_date_str
-                                           , days=0, hours=distance_days * 24))
-        history = prediction_dict[DataFrameType.HourlyHistory]
-        prediction = prediction_dict[DataFrameType.HourlyPrediction]
-        weather_codes = self.weather_code_predictor.get_weather_codes_frame(
-            history, prediction, self.include_regressors_daily
-        )
-        prediction['weather_code']=weather_codes
         actual_data = self.weather_predictor.get_actual_data(lat, lon, start_date_str, days=0, hours=distance_days*24)
-
-        return prediction, actual_data[DataFrameType.HourlyHistory]
+        prediction_dict = (self.weather_predictor.
+                           predict_weather(lat, lon, start_date_str,
+                                           days=0, hours=distance_days*24))
+        history = prediction_dict[DataFrameType.HourlyHistory.value]
+        prediction = prediction_dict[DataFrameType.HourlyPrediction.value]
+        weather_codes = self.weather_code_predictor.get_weather_codes_frame(
+            history, prediction, self.include_regressors_hourly, 'weather_code',
+            self.include_regressors_hourly
+        )
+        prediction['weather_code'] = weather_codes
+        actual_hourly = actual_data[DataFrameType.HourlyHistory.value]
+        actual_hourly['weather_code'] = WeatherCodesPredictor.replace_weather_codes(actual_hourly['weather_code'])
+        return prediction, actual_hourly
 
     def _get_for_days(self, lat, lon, start_date_str, distance_days):
         actual_data = self.weather_predictor.get_actual_data(lat, lon, start_date_str, days=distance_days, hours=0)
@@ -60,10 +66,11 @@ class WeatherForecast:
                                            days=distance_days, hours=0))
         history = prediction_dict[DataFrameType.DailyHistory.value]
         prediction = prediction_dict[DataFrameType.DailyPrediction.value]
-        # weather_codes = self.weather_code_predictor.get_weather_codes_frame(
-        #    history, prediction, self.include_regressors_daily
-        #)
-        # prediction['weather_code'] = weather_codes
-        print('WITH WEATHER CODES', len(prediction))
+        weather_codes = self.weather_code_predictor.get_weather_codes_frame(
+            history, prediction, self.include_regressors_daily, 'weather_code',
+            self.include_regressors_daily
+        )
+        prediction['weather_code'] = weather_codes
         actual_daily = actual_data[DataFrameType.DailyHistory.value]
+        actual_daily['weather_code'] = WeatherCodesPredictor.replace_weather_codes(actual_daily['weather_code'])
         return prediction, actual_daily
