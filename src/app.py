@@ -7,7 +7,6 @@ import panel as pn
 import datetime
 from json_reader.autocomplete_helper import AutocompleteHelper
 from json_reader.builder import CityCollectionBuilder
-from display_results import display_mock_data
 from display_results import build_results_widget
 from dynamic import DynamicContentHolder
 
@@ -192,9 +191,14 @@ def build_weather_forecast(event):
     if not event:
         return
     user_input = UserInputCollector.collect_user_input(map_viewer, options_box)
-
-    prediction = WeatherForecast().predict(user_input)
-    list_widget, plots_widget = build_results_widget(prediction, prediction)
+    print('\033[94m', user_input, '\033[0m')
+    prediction, actual = WeatherForecast().predict(user_input)
+    print('\033[92m', prediction, actual, '\033[0m')
+    list_widget, plots_widget = build_results_widget(prediction, actual,
+                                                     ['temperature_2m_mean', 'wind_speed_10m_max',
+                                                      'precipitation_sum', 'precipitation_hours'],
+                                                     ['Temperature', 'Wind Speed',
+                                                      'Precipitation Sum', 'Precipitation hours'])
     result_list.set_content(list_widget)
     graphs_list.set_content(plots_widget)
 
