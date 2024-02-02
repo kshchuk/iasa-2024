@@ -72,10 +72,10 @@ class WeatherPredictor:
 
         if hours > 0:
             end = (pd.Timestamp(start) + pd.Timedelta(days=hours // 24 + (1 if hours % 24 > 0 else 0) - 1)).date()
-            daily_df = self._api_client.get_hourly_weather_history(lat, lon, start.__str__(), end.__str__())
+            hourly_df = self._api_client.get_hourly_weather_history(lat, lon, start.__str__(), end.__str__())
         if days > 0:
             end = (pd.Timestamp(start) + pd.Timedelta(days=days - 1)).date()
-            hourly_df = self._api_client.get_daily_weather_history(lat, lon, start.__str__(), end.__str__())
+            daily_df = self._api_client.get_daily_weather_history(lat, lon, start.__str__(), end.__str__())
 
         if hours > 0 and days > 0:
             return {DataFrameType.HourlyHistory.value: hourly_df, DataFrameType.DailyHistory.value: daily_df}
@@ -129,21 +129,19 @@ class WeatherPredictor:
         return hourly_model.predict(period.days * 24, start_date.__str__(), hourly_train_size), df
 
 
-# pd.set_option('display.max_columns', None)
+pd.set_option('display.max_columns', None)
 
-# pd.set_option('display.max_colwidth', None)
-# pd.set_option('display.width', None)
+pd.set_option('display.max_colwidth', None)
+pd.set_option('display.width', None)
 
-# predictor = WeatherPredictor()
-# prediction = predictor.predict_weather(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=24, days=1)
+predictor = WeatherPredictor()
+prediction = predictor.predict_weather(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=24, days=1)
 
-# actual = predictor.get_actual_data(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=24, days=1)
+actual = predictor.get_actual_data(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=24, days=1)
 
-# print(actual[DataFrameType.DailyHistory.value])
-# print(actual[DataFrameType.HourlyHistory.value])
+print(prediction[DataFrameType.DailyPrediction.value])
+print(actual[DataFrameType.DailyHistory.value])
 
+print(prediction[DataFrameType.HourlyPrediction.value])
+print(actual[DataFrameType.HourlyHistory.value])
 
-# print(prediction[DataFrameType.DailyPrediction.value])
-# print(prediction[DataFrameType.DailyHistory.value])
-# print(prediction[DataFrameType.HourlyPrediction.value])
-# print(prediction[DataFrameType.HourlyHistory.value])
