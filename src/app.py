@@ -77,15 +77,25 @@ class SearchBox:
 class OptionsBox:
     def __init__(self):
         current_date = datetime.date.today()
+        common_width = 150
+        common_height = 50
+
         seven_days_ago = current_date - datetime.timedelta(days=7)
-        self.from_date_picker = pn.widgets.DatePicker(name='From', end=current_date, value=seven_days_ago)
-        self.to_date_picker = pn.widgets.DatePicker(name='To', end=current_date, value=current_date)
-        self.prediction_type = pn.widgets.Select(name='Type', options=['Daily', 'Hourly'])
-        self.options_row = pn.Row(
+        self.from_date_picker = pn.widgets.DatePicker(name='From', end=current_date, value=seven_days_ago,
+                                                      width=common_width, height=common_height)
+        self.to_date_picker = pn.widgets.DatePicker(name='To', end=current_date, value=current_date,
+                                                    width=common_width, height=common_height)
+        self.prediction_type = pn.widgets.Select(name='Type', options=['Daily', 'Hourly'],
+                                                 width=common_width, height=common_height)
+        self.submit_btn = pn.widgets.Button(name='Predict', button_type='primary',
+                                            width=common_width, height=common_height)
+        temp_flex = pn.FlexBox(
             self.from_date_picker,
             self.to_date_picker,
-            self.prediction_type
+            self.prediction_type,
+            self.submit_btn
         )
+        self.options_row = temp_flex.clone(flex_direction='row', align_items='flex-end', justify_content='center')
 
     def collect_data(self):
         return {
@@ -98,11 +108,16 @@ class OptionsBox:
         selected_date = date_picker.value
         return selected_date.strftime('%Y-%m-%d') if selected_date else ''
 
+    def set_on_predict_btn_pressed(self, runnable):
+        if not callable(runnable):
+            raise ValueError("Cannot call the runnable argument")
+        pn.bind(runnable, self.submit_btn, watch=True)
+
 
 class UserInputCollector:
-    def __init__(self, map_viewer: MapViewer, options_box: OptionsBox):
-        self.map_viewer = map_viewer
-        self.options_box = options_box
+    def __init__(self, def_map_viewer: MapViewer, def_options_box: OptionsBox):
+        self.map_viewer = def_map_viewer
+        self.options_box = def_options_box
 
     def user_input(self):
         return UserInputCollector.collect_user_input(self.map_viewer, self.options_box)
@@ -133,6 +148,16 @@ map_viewer = MapViewer()
 autocomplete_helper = SearchBox.init_autocomplete_helper()
 search_box = SearchBox(autocomplete_helper, map_viewer)
 options_box = OptionsBox()
+
+
+def build_weather_forecast(event):
+    if not event:
+        return
+    user_input = UserInputCollector.collect_user_input(map_viewer, options_box)
+    print(user_input)  # Use in weather forecast
+
+
+options_box.set_on_predict_btn_pressed(build_weather_forecast)
 
 map_component = pn.Column(
     pn.panel(map_viewer.map, sizing_mode="stretch_both", min_height=500),
