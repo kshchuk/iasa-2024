@@ -47,7 +47,8 @@ class WeatherCodesPredictor:
         x_train = df[include_regressors]
         x_predict = to_predict[include_regressors_predict]
         y = df[codes_column]
-
+        if y.nunique() < 2:
+            return [y.to_list()[0]] * len(to_predict.index)
         y = WeatherCodesPredictor.replace_weather_codes(y)
 
         scaler = StandardScaler()
