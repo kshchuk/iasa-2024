@@ -170,8 +170,8 @@ class UserInputCollector:
         current_coords = clt_viewer.current_point
         if not current_coords:
             current_coords = map_viewer.start_point
-        collected_input["lon"] = current_coords[0]
-        collected_input["lat"] = current_coords[1]
+        collected_input["lat"] = current_coords[0]
+        collected_input["lon"] = current_coords[1]
         return collected_input
 
 
