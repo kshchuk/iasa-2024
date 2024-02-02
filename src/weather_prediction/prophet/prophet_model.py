@@ -41,7 +41,7 @@ class ProphetWeatherPredictionModel:
             train = train.rename(columns={regressor: "y"})
 
             # create a new Prophet model
-            regressor_model = Prophet()
+            regressor_model = Prophet(seasonality_mode="multiplicative", yearly_seasonality='true', weekly_seasonality='auto', daily_seasonality='auto')
             regressor_model.fit(train)
 
             # cross validation
@@ -54,7 +54,7 @@ class ProphetWeatherPredictionModel:
             train = train.rename(columns={variable: "y"})
 
             # create a new Prophet model
-            variable_model = Prophet()
+            variable_model = Prophet(seasonality_mode="multiplicative", yearly_seasonality='true', weekly_seasonality='auto', daily_seasonality='auto')
             for regressor in self._regressors:
                 variable_model.add_regressor(regressor)
                 train[regressor] = self._df[regressor]
@@ -99,7 +99,7 @@ class ProphetWeatherPredictionModel:
             train = train.rename(columns={regressor: "y"})
 
             # create a new Prophet model
-            regressor_model = Prophet()
+            regressor_model = Prophet(seasonality_mode="multiplicative", yearly_seasonality='true', weekly_seasonality='auto', daily_seasonality='auto')
             regressor_model.fit(train)
 
             regressor_future = regressor_model.predict(only_future)
@@ -116,7 +116,7 @@ class ProphetWeatherPredictionModel:
             train = train.rename(columns={variable: "y"})
 
             # create a new Prophet models
-            variable_model = Prophet()
+            variable_model = Prophet(seasonality_mode="multiplicative", yearly_seasonality='true', weekly_seasonality='auto', daily_seasonality='auto')
             for regressor in self._regressors:
                 variable_model.add_regressor(regressor)
                 train[regressor] = train_data[regressor]

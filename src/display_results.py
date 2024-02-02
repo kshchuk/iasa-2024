@@ -160,6 +160,7 @@ def _replace_plot(event, dynamic_plot, plots):
 def _build_plots_widget(actual_weather, predicted_weather, use_columns, column_names, date_column):
     plots = {}
     dates = _extract_column(actual_weather, date_column)
+    dates = [date.strftime("%y-%m-%d") for date in dates]
     options = column_names
     for column_name, pretty_name in zip(use_columns, column_names):
         column_actual_data = _extract_column(actual_weather, column_name)

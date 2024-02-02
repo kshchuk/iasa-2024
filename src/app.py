@@ -26,7 +26,6 @@ class MapViewer:
         self.current_point: tuple[float, float] = self.start_point
         self.marker: Marker = Marker(location=self.start_point, visible=True, draggable=False)
         self.map.add(self.marker)
-        self.json_widget: pn.pane.JSON = pn.pane.JSON({}, height=75)
 
         self.map.layout.height = "100%"
         self.map.layout.width = "100%"
@@ -35,8 +34,6 @@ class MapViewer:
 
     def update_map(self, latitude, longitude):
         self.current_point = (latitude, longitude)
-        self.json_widget.object = {"x": self.current_point[0],
-                                   "y": self.current_point[1]}
         self.marker.location = self.current_point
 
         if self.search_box_ref:
@@ -220,8 +217,7 @@ def build_weather_forecast(event):
 options_box.set_on_predict_btn_pressed(build_weather_forecast)
 
 map_component = pn.Column(
-    pn.panel(map_viewer.map, sizing_mode="stretch_both", min_height=500),
-    map_viewer.json_widget
+    pn.panel(map_viewer.map, sizing_mode="stretch_both", min_height=500)
 )
 left_pane = pn.Column(
     map_component, graphs_list.get_holder()
