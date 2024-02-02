@@ -60,6 +60,27 @@ class WeatherPredictor:
         """
         pass
 
+    def get_actual_data(self, lat: float, lon: float, start: str,
+                        hours: int = 0,
+                        days: int = 0) -> pd.DataFrame | dict[str, pd.DataFrame]:
+        """Get actual weather data for specific location."""
+        assert hours > 0 or days > 0, "At least one of hours or days must be greater than 0."
+        global hourly_df, daily_df
+
+        if hours > 0:
+            end = pd.Timestamp(start) + pd.Timedelta(days=hours // 24 + (1 if hours % 24 > 0 else 0))
+            daily_df = self._api_client.get_daily_weather_history(lat, lon, start.__str__(), end.__str__())
+        if days > 0:
+            end = pd.Timestamp(start) + pd.Timedelta(days=days)
+            hourly_df = self._api_client.get_hourly_weather_history(lat, lon, start.__str__(), end.__str__())
+
+        if hours > 0 and days > 0:
+            return {DataFrameType.Hourly.value: hourly_df, DataFrameType.Daily.value: daily_df}
+        elif hours > 0:
+            return {DataFrameType.Hourly.value: hourly_df}
+        else:
+            return {DataFrameType.Daily.value: daily_df}
+
     async def _predict_daily_weather(self, lat: float, lon: float, start: str, end: str) -> pd.DataFrame:
         """
         Predict daily weather for specific location.
@@ -104,11 +125,11 @@ class WeatherPredictor:
 
 
 # pd.set_option('display.max_columns', None)
-
+#
 # pd.set_option('display.max_colwidth', None)
 # pd.set_option('display.width', None)
-
+#
 # predictor = WeatherPredictor()
-# prediction = predictor.predict_weather(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=26, days=3)
+# prediction = predictor.predict_weather(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=24, days=0)
 # print(prediction["HOURLY"])
 # print(prediction["DAILY"])

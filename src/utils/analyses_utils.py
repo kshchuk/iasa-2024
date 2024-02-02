@@ -56,3 +56,4 @@ def prepare_data(df: pd.DataFrame, discrete_features: list[str]) -> pd.DataFrame
     df = df.dropna(subset=discrete_features)
     df = df.interpolate(method="linear", limit_direction="both")
     return df
+
