@@ -145,10 +145,28 @@ class UserInputCollector:
         return collected_input
 
 
+class DynamicContentHolder:
+    def __init__(self):
+        self._holder = pn.Column()
+
+    def set_content(self, widget):
+        self._holder.clear()
+        self._holder.append(widget)
+
+    def set_holder(self, panelT):
+        self._holder = panelT
+
+    def get_holder(self):
+        return self._holder
+
+
 map_viewer = MapViewer()
 autocomplete_helper = SearchBox.init_autocomplete_helper()
 search_box = SearchBox(autocomplete_helper, map_viewer)
 options_box = OptionsBox()
+
+result_list = DynamicContentHolder()
+graphs_list = DynamicContentHolder()
 
 
 def build_weather_forecast(event):
@@ -157,8 +175,8 @@ def build_weather_forecast(event):
     user_input = UserInputCollector.collect_user_input(map_viewer, options_box)
     print(user_input)  # Use in weather forecast
     list_widget, plots_widget = display_mock_data()
-    inputs_component.append(list_widget)
-    map_component.append(plots_widget)
+    result_list.set_content(list_widget)
+    graphs_list.set_content(plots_widget)
 
 
 options_box.set_on_predict_btn_pressed(build_weather_forecast)
@@ -167,13 +185,17 @@ map_component = pn.Column(
     pn.panel(map_viewer.map, sizing_mode="stretch_both", min_height=500),
     map_viewer.json_widget
 )
+left_pane = pn.Column(
+    map_component, graphs_list.get_holder()
+)
 
 inputs_component = pn.Column(
     pn.Row(search_box.search_field, height=100),
-    pn.Row(options_box.options_row, height=100)
+    pn.Row(options_box.options_row, height=100),
+    result_list.get_holder()
 )
 main_component = pn.Row(
-    map_component, inputs_component
+    left_pane, inputs_component
 )
 
 template = pn.template.FastListTemplate(
