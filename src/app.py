@@ -7,6 +7,7 @@ import panel as pn
 import datetime
 from json_reader.autocomplete_helper import AutocompleteHelper
 from json_reader.builder import CityCollectionBuilder
+from display_results import display_mock_data
 
 pn.extension("ipywidgets", sizing_mode="stretch_width")
 
@@ -155,6 +156,9 @@ def build_weather_forecast(event):
         return
     user_input = UserInputCollector.collect_user_input(map_viewer, options_box)
     print(user_input)  # Use in weather forecast
+    list_widget, plots_widget = display_mock_data()
+    inputs_component.append(list_widget)
+    map_component.append(plots_widget)
 
 
 options_box.set_on_predict_btn_pressed(build_weather_forecast)
