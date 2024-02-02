@@ -33,8 +33,6 @@ class WeatherPredictor:
         global hourly_prediction, daily_prediction, hourly_df, daily_df
         assert hours > 0 or days > 0, "At least one of hours or days must be greater than 0."
 
-        loop = asyncio.get_event_loop()
-
         if hours > 0:
             end = pd.Timestamp(start) + pd.Timedelta(days=hours // 24 + (1 if hours % 24 > 0 else 0))
             hourly_prediction, hourly_df = self._predict_hourly_weather(lat, lon, start, end.__str__())
@@ -48,9 +46,11 @@ class WeatherPredictor:
         elif hours > 0:
             return {DataFrameType.HourlyPrediction.value: hourly_prediction,
                     DataFrameType.HourlyHistory.value: hourly_df}
-        else:
+        elif days > 0:
             return {DataFrameType.DailyPrediction.value: daily_prediction,
                     DataFrameType.DailyHistory.value: daily_df}
+        else:
+            return {}
 
     def calculate_metrics(self, lat: float, lon: float, start: str, end: str) -> dict[str, pd.DataFrame]:
         """Calculate metrics for specific location.
@@ -72,17 +72,19 @@ class WeatherPredictor:
 
         if hours > 0:
             end = pd.Timestamp(start).date()
-            daily_df = self._api_client.get_daily_weather_history(lat, lon, start.__str__(), end.__str__())
+            daily_df = self._api_client.get_hourly_weather_history(lat, lon, start.__str__(), end.__str__())
         if days > 0:
             end = pd.Timestamp(start).date()
-            hourly_df = self._api_client.get_hourly_weather_history(lat, lon, start.__str__(), end.__str__())
+            hourly_df = self._api_client.get_daily_weather_history(lat, lon, start.__str__(), end.__str__())
 
         if hours > 0 and days > 0:
             return {DataFrameType.HourlyHistory.value: hourly_df, DataFrameType.DailyHistory.value: daily_df}
         elif hours > 0:
             return {DataFrameType.HourlyHistory.value: hourly_df}
-        else:
+        elif days > 0:
             return {DataFrameType.DailyHistory.value: daily_df}
+        else:
+            return {}
 
     def _predict_daily_weather(self, lat: float, lon: float, start: str, end: str) -> (pd.DataFrame, pd.DataFrame):
         """
