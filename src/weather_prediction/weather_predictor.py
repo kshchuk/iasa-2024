@@ -1,4 +1,5 @@
 import asyncio
+from typing import Dict, Any
 
 import pandas as pd
 
@@ -8,7 +9,7 @@ from weather_prediction.features import daily_discrete_features, daily_regressor
     hourly_regressors
 from weather_prediction.prophet.prophet_model import ProphetWeatherPredictionModel
 
-daily_train_size = 1000   # how many days to use for training
+daily_train_size = 1000  # how many days to use for training
 hourly_train_size = 1000  # how many hours to use for training
 
 
@@ -41,7 +42,8 @@ class WeatherPredictor:
             daily_prediction, daily_df = self._predict_daily_weather(lat, lon, start, end.__str__())
 
         if hours > 0 and days > 0:
-            return {DataFrameType.HourlyPrediction.value: hourly_prediction, DataFrameType.DailyPrediction.value: daily_prediction,
+            return {DataFrameType.HourlyPrediction.value: hourly_prediction,
+                    DataFrameType.DailyPrediction.value: daily_prediction,
                     DataFrameType.HourlyHistory.value: hourly_df, DataFrameType.DailyHistory.value: daily_df}
         elif hours > 0:
             return {DataFrameType.HourlyPrediction.value: hourly_prediction,
@@ -52,7 +54,7 @@ class WeatherPredictor:
         else:
             return {}
 
-    def calculate_metrics(self, lat: float, lon: float, start: str, end: str) -> dict[str, pd.DataFrame]:
+    def calculate_metrics(self, lat: float, lon: float, start: str, end: str) -> dict[str, dict[str, Any]]:
         """Calculate metrics for specific location.
 
         :param lat: (float) Latitude.
@@ -61,7 +63,16 @@ class WeatherPredictor:
         :param end: (str) End date ISO 8601 to which the prediction will be made, e.g. end=2024-01-26
         :return: (dict) Metrics. Keys: "HOURLY", "DAILY".
         """
-        pass
+        start = (pd.Timestamp(start)).date()
+        end = (pd.Timestamp(end)).date()
+        dataframe = self._api_client.get_daily_weather_history(lat, lon, start.__str__(), end.__str__())
+        dataframe = prepare_data(dataframe, daily_discrete_features)
+        test = ProphetWeatherPredictionModel.test(7,
+                                                  dataframe,
+                                                  DataFrameType.DailyHistory,
+                                                  daily_regressors,
+                                                  daily_train_size)
+        return test
 
     def get_actual_data(self, lat: float, lon: float, start: str,
                         hours: int = 0,
@@ -129,19 +140,21 @@ class WeatherPredictor:
         return hourly_model.predict(period.days * 24, start_date.__str__(), hourly_train_size), df
 
 
-pd.set_option('display.max_columns', None)
+# pd.set_option('display.max_columns', None)
 
-pd.set_option('display.max_colwidth', None)
-pd.set_option('display.width', None)
+# pd.set_option('display.max_colwidth', None)
+# pd.set_option('display.width', None)
 
-predictor = WeatherPredictor()
-prediction = predictor.predict_weather(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=24, days=1)
+# predictor = WeatherPredictor()
+# prediction = predictor.predict_weather(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=50, days=7)
 
-actual = predictor.get_actual_data(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=24, days=1)
+# actual = predictor.get_actual_data(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=50, days=7)
 
-print(prediction[DataFrameType.DailyPrediction.value])
-print(actual[DataFrameType.DailyHistory.value])
+# print(prediction[DataFrameType.DailyPrediction.value])
+# print(actual[DataFrameType.DailyHistory.value])
 
-print(prediction[DataFrameType.HourlyPrediction.value])
-print(actual[DataFrameType.HourlyHistory.value])
+# print(prediction[DataFrameType.HourlyPrediction.value])
+# print(actual[DataFrameType.HourlyHistory.value])
 
+# metrics = predictor.calculate_metrics(-11.754611883149868, 19.918700267723633, "2000-01-01", "2021-01-01")
+# print(metrics)
