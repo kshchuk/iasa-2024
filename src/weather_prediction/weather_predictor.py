@@ -129,21 +129,19 @@ class WeatherPredictor:
         return hourly_model.predict(period.days * 24, start_date.__str__(), hourly_train_size), df
 
 
-# pd.set_option('display.max_columns', None)
+pd.set_option('display.max_columns', None)
 
-# pd.set_option('display.max_colwidth', None)
-# pd.set_option('display.width', None)
+pd.set_option('display.max_colwidth', None)
+pd.set_option('display.width', None)
 
-# predictor = WeatherPredictor()
-# prediction = predictor.predict_weather(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=24, days=1)
+predictor = WeatherPredictor()
+prediction = predictor.predict_weather(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=24, days=1)
 
-# actual = predictor.get_actual_data(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=24, days=1)
+actual = predictor.get_actual_data(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=24, days=1)
 
-# print(actual[DataFrameType.DailyHistory.value])
-# print(actual[DataFrameType.HourlyHistory.value])
+print(prediction[DataFrameType.DailyPrediction.value])
+print(actual[DataFrameType.DailyHistory.value])
 
+print(prediction[DataFrameType.HourlyPrediction.value])
+print(actual[DataFrameType.HourlyHistory.value])
 
-# print(prediction[DataFrameType.DailyPrediction.value])
-# print(prediction[DataFrameType.DailyHistory.value])
-# print(prediction[DataFrameType.HourlyPrediction.value])
-# print(prediction[DataFrameType.HourlyHistory.value])
