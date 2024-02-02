@@ -8,6 +8,7 @@ import datetime
 from json_reader.autocomplete_helper import AutocompleteHelper
 from json_reader.builder import CityCollectionBuilder
 from display_results import display_mock_data
+from dynamic import DynamicContentHolder
 
 pn.extension("ipywidgets", sizing_mode="stretch_width")
 
@@ -157,19 +158,7 @@ class UserInputCollector:
         return collected_input
 
 
-class DynamicContentHolder:
-    def __init__(self):
-        self._holder = pn.Column()
 
-    def set_content(self, widget):
-        self._holder.clear()
-        self._holder.append(widget)
-
-    def set_holder(self, panelT):
-        self._holder = panelT
-
-    def get_holder(self):
-        return self._holder
 
 
 map_viewer = MapViewer()

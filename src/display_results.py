@@ -1,8 +1,9 @@
 import panel as pn
-import panel.widgets
 from typing import List
 import pandas as pd
-import hvplot.pandas
+from dynamic import DynamicContentHolder
+import matplotlib.pyplot as plt
+
 
 def display_mock_data():
     actual_weather = [
@@ -97,6 +98,17 @@ def _colored_rectangles(words, colors):
     return pn.FlexBox(*rectangles).clone(flex_wrap='nowrap', flex_direction='row')
 
 
+def _create_plot_matplot(dates, column_actual_data, column_predicted_data, title):
+    fig, ax = plt.subplots()
+    ax.plot(dates, column_actual_data, label='Actual', marker='o')
+    ax.plot(dates, column_predicted_data, label='Predicted', linestyle='--', marker='x')
+    ax.set_title(title)
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Value')
+    ax.legend()
+    return fig
+
+
 def _build_result_list_widget(actual_weather, predicted_weather, use_columns, column_names, date_column):
     def_styles = """
         <style>
@@ -123,7 +135,7 @@ def _build_result_list_widget(actual_weather, predicted_weather, use_columns, co
              '</tr>')
 
     for actual_w, predicted_w in zip(actual_weather, predicted_weather):
-        date_rowspan = f'rowspan="{len(column_names)+1}"'
+        date_rowspan = f'rowspan="{len(column_names) + 1}"'
 
         html += f'<tr><td {date_rowspan} style="vertical-align: middle;"><b>{actual_w["date"]}</b></td></tr>'
         for column_name, pretty_name in zip(use_columns, column_names):
@@ -137,15 +149,36 @@ def _build_result_list_widget(actual_weather, predicted_weather, use_columns, co
     return html
 
 
+def _replace_plot(event, dynamic_plot, plots):
+    if not event:
+        return
+    option = event.new
+    if option not in plots:
+        return
+    dynamic_plot.set_content(plots[option])
+
+
 def _build_plots_widget(actual_weather, predicted_weather, use_columns, column_names, date_column):
-    plots = pn.Column()
+    plots = {}
     dates = _extract_column(actual_weather, date_column)
+    options = column_names
     for column_name, pretty_name in zip(use_columns, column_names):
         column_actual_data = _extract_column(actual_weather, column_name)
         column_predicted_data = _extract_column(predicted_weather, column_name)
-        plot = _create_plot(dates, column_actual_data, column_predicted_data, pretty_name)
-        plots.append(plot)
-    return plots
+        plot = _create_plot_matplot(dates, column_actual_data, column_predicted_data, pretty_name)
+        plots[pretty_name] = plot
+    dynamic_plot = DynamicContentHolder()
+    select_plot = pn.widgets.Select(options=options)
+    select_plot = select_plot.clone(margin=25)
+    widget = pn.Column(
+        select_plot,
+        dynamic_plot.get_holder()
+    )
+    if len(plots) > 0:
+        select_plot.param.watch(lambda event: _replace_plot(event, dynamic_plot, plots), 'value')
+        select_plot.value = options[0]
+        dynamic_plot.set_content(plots[options[0]])
+    return widget
 
 
 def _create_plot(dates, actual_data, predicted_data, title):
