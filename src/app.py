@@ -27,16 +27,23 @@ class MapViewer:
         self.map.layout.height = "100%"
         self.map.layout.width = "100%"
         self.map.on_interaction(self.handler)
+        self.search_box_ref = None
 
     def update_map(self, latitude, longitude):
         self.current_point = (latitude, longitude)
         self.json_widget.object = {"x": self.current_point[0],
                                    "y": self.current_point[1]}
+        if self.search_box_ref:
+            self.search_box_ref.forced_change(
+                self.search_box_ref.autocomplete_helper.find_closest(latitude, longitude))
 
     def handler(self, **kwargs):
         if kwargs.get('type') == 'click':
             latlon = kwargs.get('coordinates')
             self.update_map(latlon[0], latlon[1])
+
+    def set_search_box_ref(self, search_box_ref):
+        self.search_box_ref = search_box_ref
 
 
 class SearchBox:
@@ -48,6 +55,7 @@ class SearchBox:
         self.autocomplete_helper = autocomplete_helper_arg
         self.affected_map = affected_map
         self.limit = limit
+        self.forced = False
         self.search_field = panel.widgets.AutocompleteInput(
             name='City', options=[],
             case_sensitive=False, search_strategy='includes',
@@ -61,7 +69,7 @@ class SearchBox:
 
     def update_options(self, event):
         current_input = event.new
-        if current_input == '':
+        if current_input == '' or self.forced:
             return
         city = self.autocomplete_helper.find_by_key(current_input)
         if self.affected_map:
@@ -74,9 +82,9 @@ class SearchBox:
             return
         current_input = event.new
         if current_input == '':
-            self.search_field.options=[]
+            self.search_field.options = []
         new_options = self.autocomplete_helper.find_first_n(current_input, n=self.limit)
-        self.search_field.options=new_options
+        self.search_field.options = new_options
 
     @staticmethod
     def init_autocomplete_helper():
@@ -86,6 +94,11 @@ class SearchBox:
             print("Error while creating AutoCompleteHelper:", e)
             traceback.print_exc()
             return AutocompleteHelper()
+
+    def forced_change(self, option):
+        self.forced = True
+        self.search_field.value = option
+        self.forced = False
 
 
 class OptionsBox:
@@ -158,12 +171,10 @@ class UserInputCollector:
         return collected_input
 
 
-
-
-
 map_viewer = MapViewer()
 autocomplete_helper = SearchBox.init_autocomplete_helper()
 search_box = SearchBox(autocomplete_helper, map_viewer)
+map_viewer.set_search_box_ref(search_box)
 options_box = OptionsBox()
 
 result_list = DynamicContentHolder()
