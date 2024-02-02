@@ -14,7 +14,7 @@ hourly_train_size = 1000  # how many hours to use for training
 
 # formula to calculate the number of days to train the model
 def calculate_daily_train_size(period: int) -> int:
-    return int(period * 9 - 5)
+    return int(period * 9 - 5) % 100000
 
 
 class WeatherPredictor:
