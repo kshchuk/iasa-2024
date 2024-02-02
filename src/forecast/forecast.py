@@ -48,24 +48,22 @@ class WeatherForecast:
         weather_codes = self.weather_code_predictor.get_weather_codes_frame(
             history, prediction, self.include_regressors_daily
         )
-        prediction['weather_codes']=weather_codes
+        prediction['weather_code']=weather_codes
         actual_data = self.weather_predictor.get_actual_data(lat, lon, start_date_str, days=0, hours=distance_days*24)
 
         return prediction, actual_data[DataFrameType.HourlyHistory]
 
     def _get_for_days(self, lat, lon, start_date_str, distance_days):
-        print("--------------------------BEFORE--------------------------")
         actual_data = self.weather_predictor.get_actual_data(lat, lon, start_date_str, days=distance_days, hours=0)
-        print("--------------------------AFTER--------------------------")
         prediction_dict = (self.weather_predictor.
                            predict_weather(lat, lon, start_date_str,
                                            days=distance_days, hours=0))
-
-        history = prediction_dict[DataFrameType.DailyHistory]
-        prediction = prediction_dict[DataFrameType.DailyPrediction]
+        history = prediction_dict[DataFrameType.DailyHistory.value]
+        prediction = prediction_dict[DataFrameType.DailyPrediction.value]
         weather_codes = self.weather_code_predictor.get_weather_codes_frame(
             history, prediction, self.include_regressors_daily
         )
-        prediction['weather_codes'] = weather_codes
-
-        return prediction, actual_data[DataFrameType.DailyHistory]
+        prediction['weather_code'] = weather_codes
+        print('WITH WEATHER CODES', len(prediction))
+        actual_daily = actual_data[DataFrameType.DailyHistory.value]
+        return prediction, actual_daily

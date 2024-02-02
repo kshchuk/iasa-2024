@@ -68,7 +68,6 @@ def build_results_widget(actual_weather, predicted_weather, use_columns: List[st
     :param column_names: pretty names for columns in the same order as use_columns
     :return: tuple (ListWidget, GraphWidget)
     """
-
     if len(actual_weather) != len(predicted_weather):
         raise ValueError("actual_weather and predicted_weather lengths do not match")
 
