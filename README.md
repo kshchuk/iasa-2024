@@ -30,7 +30,7 @@ After deploying the app (either directly or using Docker) you will be greeted by
 Your starting point is Kyiv, capital of Ukraine. To choose a new geographic location you can either click on the map or enter its name in search bar, located at the uppermost corner. If you click on the map, searchbar displays closest recorded city/location to it.
 
 ## Predictions
-After selecting location, you can choose paramaters for creating weather prediction: start date, end date and format (hourly or daily). Start and end date are restricted by yesterday - so we can actually compare results of our predictions with reality.
+After selecting location, you can choose paramaters for creating weather prediction: start date, end date and format (hourly or daily). Start and end date are restricted by yesterday - so we can actually compare results of our predictions with reality (also lower bound is 1985 because of API).
 ![image](https://github.com/kshchuk/iasa-2024/assets/96624185/ae99d80c-ad5a-47df-854a-0c497a0eb884)
 
 After pressing button "Predict" you will see table of results with graphics for each parameter.
