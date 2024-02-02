@@ -71,10 +71,10 @@ class WeatherPredictor:
         global hourly_df, daily_df
 
         if hours > 0:
-            end = pd.Timestamp(start).date()
+            end = (pd.Timestamp(start) + pd.Timedelta(days=hours // 24 + (1 if hours % 24 > 0 else 0) - 1)).date()
             daily_df = self._api_client.get_hourly_weather_history(lat, lon, start.__str__(), end.__str__())
         if days > 0:
-            end = pd.Timestamp(start).date()
+            end = (pd.Timestamp(start) + pd.Timedelta(days=days - 1)).date()
             hourly_df = self._api_client.get_daily_weather_history(lat, lon, start.__str__(), end.__str__())
 
         if hours > 0 and days > 0:
