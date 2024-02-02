@@ -139,7 +139,8 @@ class WeatherPredictor:
 
 # actual = predictor.get_actual_data(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=24, days=1)
 
-# print(actual)
+# print(actual[DataFrameType.DailyHistory.value])
+# print(actual[DataFrameType.HourlyHistory.value])
 
 
 # print(prediction[DataFrameType.DailyPrediction.value])
