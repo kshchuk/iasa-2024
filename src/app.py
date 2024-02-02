@@ -111,7 +111,8 @@ class OptionsBox:
         common_height = 50
         min_date = datetime.datetime.strptime("1985-01-01", "%Y-%m-%d").date()
         seven_days_ago = current_date - datetime.timedelta(days=7)
-        self.from_date_picker = pn.widgets.DatePicker(name='From', start=min_date, end=current_date, value=seven_days_ago,
+        self.from_date_picker = pn.widgets.DatePicker(name='From', start=min_date, end=current_date,
+                                                      value=seven_days_ago,
                                                       width=common_width, height=common_height)
         self.to_date_picker = pn.widgets.DatePicker(name='To', start=min_date, end=current_date, value=current_date,
                                                     width=common_width, height=common_height)
@@ -191,11 +192,24 @@ def build_weather_forecast(event):
     print('\033[94m', user_input, '\033[0m')
     prediction, actual = WeatherForecast().predict(user_input)
     print('\033[92m', prediction, actual, '\033[0m')
-    list_widget, plots_widget = build_results_widget(actual, prediction,
-                                                     ['temperature_2m_mean', 'wind_speed_10m_max',
-                                                      'precipitation_sum', 'precipitation_hours'],
-                                                     ['Temperature', 'Wind Speed',
-                                                      'Precipitation Sum', 'Precipitation hours'], date_column='date')
+    if user_input['type'] == 'Hourly':
+        list_widget, plots_widget = build_results_widget(actual, prediction,
+                                                         [
+                                                             'temperature_2m', 'relative_humidity_2m', 'precipitation',
+                                                             'cloud_cover', 'surface_pressure',
+                                                             'wind_speed_10m', 'weather_code'
+                                                         ],
+                                                         ['Temperature', 'Relative Humidity',
+                                                          'Precipitation', 'Cloud Colver', 'Surface Pressure',
+                                                          'Wind Speed', 'Weather type'],
+                                                         date_column='date')
+    else:
+        list_widget, plots_widget = build_results_widget(actual, prediction,
+                                                         ['temperature_2m_mean', 'wind_speed_10m_max',
+                                                          'precipitation_sum', 'precipitation_hours', 'weather_code'],
+                                                         ['Temperature', 'Wind Speed',
+                                                          'Precipitation Sum', 'Precipitation Hours', 'Weather Type'],
+                                                         date_column='date')
     result_list.set_content(list_widget)
     graphs_list.set_content(plots_widget)
 
@@ -224,4 +238,4 @@ template = pn.template.FastListTemplate(
     header_background=ACCENT_BASE_COLOR,
     accent_base_color=ACCENT_BASE_COLOR,
     main=[main_component],
-) .servable()
+).servable()
