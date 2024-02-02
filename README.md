@@ -35,5 +35,5 @@ After selecting location, you can choose paramaters for creating weather predict
 
 After pressing button "Predict" you will see table of results with graphics for each parameter.
 ![image](https://github.com/kshchuk/iasa-2024/assets/96624185/443b6d81-8767-4881-b52f-5967035fbed7)
-![image](https://github.com/kshchuk/iasa-2024/assets/96624185/ab7a0a53-5a7e-4576-9619-88a9878965e2)
+![image](![image](https://github.com/kshchuk/iasa-2024/assets/98614059/0c5ef120-856b-4aa8-9c93-3a3c826333a9)
 ![image](https://github.com/kshchuk/iasa-2024/assets/96624185/12d70c0d-78a3-4940-a153-1b267a39cefd)
