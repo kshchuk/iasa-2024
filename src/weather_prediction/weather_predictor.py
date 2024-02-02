@@ -37,10 +37,10 @@ class WeatherPredictor:
 
         if hours > 0:
             end = pd.Timestamp(start) + pd.Timedelta(days=hours // 24 + (1 if hours % 24 > 0 else 0))
-            hourly_prediction, hourly_df = loop.run_until_complete(self._predict_hourly_weather(lat, lon, start, end.__str__()))
+            hourly_prediction, hourly_df = self._predict_hourly_weather(lat, lon, start, end.__str__())
         if days > 0:
             end = pd.Timestamp(start) + pd.Timedelta(days=days)
-            daily_prediction, daily_df = loop.run_until_complete(self._predict_daily_weather(lat, lon, start, end.__str__()))
+            daily_prediction, daily_df = self._predict_daily_weather(lat, lon, start, end.__str__())
 
         if hours > 0 and days > 0:
             return {DataFrameType.HourlyPrediction.value: hourly_prediction, DataFrameType.DailyPrediction.value: daily_prediction,
@@ -71,10 +71,10 @@ class WeatherPredictor:
         global hourly_df, daily_df
 
         if hours > 0:
-            end = pd.Timestamp(start) + pd.Timedelta(days=hours // 24 + (1 if hours % 24 > 0 else 0))
+            end = pd.Timestamp(start).date()
             daily_df = self._api_client.get_daily_weather_history(lat, lon, start.__str__(), end.__str__())
         if days > 0:
-            end = pd.Timestamp(start) + pd.Timedelta(days=days)
+            end = pd.Timestamp(start).date()
             hourly_df = self._api_client.get_hourly_weather_history(lat, lon, start.__str__(), end.__str__())
 
         if hours > 0 and days > 0:
@@ -84,7 +84,7 @@ class WeatherPredictor:
         else:
             return {DataFrameType.DailyHistory.value: daily_df}
 
-    async def _predict_daily_weather(self, lat: float, lon: float, start: str, end: str) -> (pd.DataFrame, pd.DataFrame):
+    def _predict_daily_weather(self, lat: float, lon: float, start: str, end: str) -> (pd.DataFrame, pd.DataFrame):
         """
         Predict daily weather for specific location.
 
@@ -105,7 +105,7 @@ class WeatherPredictor:
         start_date = pd.to_datetime(start)
         return (daily_model.predict(period.days, start_date.__str__(), daily_train_size), df)
 
-    async def _predict_hourly_weather(self, lat: float, lon: float, start: str, end: str) -> (pd.DataFrame, pd.DataFrame):
+    def _predict_hourly_weather(self, lat: float, lon: float, start: str, end: str) -> (pd.DataFrame, pd.DataFrame):
         """
         Predict hourly weather for specific location.
 
@@ -134,5 +134,13 @@ class WeatherPredictor:
 
 # predictor = WeatherPredictor()
 # prediction = predictor.predict_weather(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=24, days=1)
+
+# actual = predictor.get_actual_data(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=24, days=1)
+
+# print(actual)
+
+
 # print(prediction[DataFrameType.DailyPrediction.value])
+# print(prediction[DataFrameType.DailyHistory.value])
+# print(prediction[DataFrameType.HourlyPrediction.value])
 # print(prediction[DataFrameType.HourlyHistory.value])
