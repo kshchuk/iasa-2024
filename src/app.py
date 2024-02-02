@@ -196,9 +196,10 @@ def build_weather_forecast(event):
     print('\033[92m', prediction, actual, '\033[0m')
     list_widget, plots_widget = build_results_widget(actual, prediction,
                                                      ['temperature_2m_mean', 'wind_speed_10m_max',
-                                                      'precipitation_sum', 'precipitation_hours'],
+                                                      'precipitation_sum', 'precipitation_hours', 'weather_code'],
                                                      ['Temperature', 'Wind Speed',
-                                                      'Precipitation Sum', 'Precipitation hours'], date_column='date')
+                                                      'Precipitation Sum', 'Precipitation hours', 'Weather type' ],
+                                                     date_column='date')
     result_list.set_content(list_widget)
     graphs_list.set_content(plots_widget)
 
@@ -228,5 +229,4 @@ template = pn.template.FastListTemplate(
     header_background=ACCENT_BASE_COLOR,
     accent_base_color=ACCENT_BASE_COLOR,
     main=[main_component],
-) #.servable()
-pn.serve(template)
+).servable()
