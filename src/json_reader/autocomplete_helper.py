@@ -20,3 +20,10 @@ class AutocompleteHelper:
 
     def all_keys(self):
         return list(self.map.keys())
+
+    def find_first_n(self, target_string, n=10):
+        target_lower = target_string.lower()
+        strings = self.all_keys()
+        matching_strings = [string for string in strings if target_lower in string.lower()]
+        return matching_strings[:n]
+

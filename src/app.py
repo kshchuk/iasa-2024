@@ -42,28 +42,40 @@ class SearchBox:
     affected_map = None
     autocomplete_helper = None
 
-    def __init__(self, autocomplete_helper: AutocompleteHelper,
+    def __init__(self, autocomplete_helper_arg: AutocompleteHelper, limit=10,
                  affected_map: MapViewer = None):
-        self.autocomplete_helper = autocomplete_helper
+        self.autocomplete_helper = autocomplete_helper_arg
         self.affected_map = affected_map
+        self.limit = limit
         self.search_field = panel.widgets.AutocompleteInput(
-            name='City', options=autocomplete_helper.all_keys(),
+            name='City', options=[],
             case_sensitive=False, search_strategy='includes',
             placeholder='Search city',
             min_characters=2
         )
         self.search_field.param.watch(self.update_options, 'value',
                                       onlychanged=False)
+        self.search_field.param.watch(self.on_input_update, 'value_input',
+                                      onlychanged=False)
 
     def update_options(self, event):
         current_input = event.new
         if current_input == '':
             return
-        city = autocomplete_helper.find_by_key(current_input)
+        city = self.autocomplete_helper.find_by_key(current_input)
         if self.affected_map:
             self.affected_map.map.center = (city.lat, city.lon)
             self.affected_map.map.zoom = 8
             self.affected_map.update_map(city.lat, city.lon)
+
+    def on_input_update(self, event):
+        if not event:
+            return
+        current_input = event.new
+        if current_input == '':
+            self.search_field.options=[]
+        new_options = self.autocomplete_helper.find_first_n(current_input, n=self.limit)
+        self.search_field.options=new_options
 
     @staticmethod
     def init_autocomplete_helper():
