@@ -9,7 +9,7 @@ from weather_prediction.features import daily_discrete_features, daily_regressor
     hourly_regressors
 from weather_prediction.prophet.prophet_model import ProphetWeatherPredictionModel
 
-daily_train_size = 1000  # how many days to use for training
+daily_train_size = 25  # how many days to use for training
 hourly_train_size = 1000  # how many hours to use for training
 
 
