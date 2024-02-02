@@ -73,6 +73,7 @@ def build_results_widget(actual_weather, predicted_weather, use_columns: List[st
 
     if len(use_columns) != len(column_names):
         raise ValueError("use_columns and column_names lengths do not match")
+
     list_widget = _build_result_list_widget(actual_weather, predicted_weather, use_columns, column_names, date_column)
     plots_widget = _build_plots_widget(actual_weather, predicted_weather, use_columns, column_names, date_column)
     return list_widget, plots_widget
@@ -99,8 +100,8 @@ def _colored_rectangles(words, colors):
 
 def _create_plot_matplot(dates, column_actual_data, column_predicted_data, title):
     fig, ax = plt.subplots()
-    ax.plot(dates, column_actual_data, label='Actual', marker='o')
-    ax.plot(dates, column_predicted_data, label='Predicted', linestyle='--', marker='x')
+    ax.plot(dates, column_predicted_data, label='Predicted', marker='o')
+    ax.plot(dates, column_actual_data , label='Actual', linestyle='--', marker='x')
     ax.set_title(title)
     ax.set_xlabel('Date')
     ax.set_ylabel('Value')
@@ -132,8 +133,7 @@ def _build_result_list_widget(actual_weather, predicted_weather, use_columns, co
     html += ('<tr><th>Date</th><th>Parameter</th>'
              '<th style="color:green">Actual</th><th style="color:#dd0000">Predicted</th>'
              '</tr>')
-
-    for actual_w, predicted_w in zip(actual_weather, predicted_weather):
+    for (_, actual_w), (_, predicted_w) in zip(actual_weather.iterrows(), predicted_weather.iterrows()):
         date_rowspan = f'rowspan="{len(column_names) + 1}"'
 
         html += f'<tr><td {date_rowspan} style="vertical-align: middle;"><b>{actual_w["date"]}</b></td></tr>'
@@ -200,5 +200,5 @@ def _create_plot(dates, actual_data, predicted_data, title):
     return pn.panel(plot)
 
 
-def _extract_column(weather_set, column_name):
-    return [ws[column_name] for ws in weather_set]
+def _extract_column(weather_set: pd.DataFrame, column_name: str):
+    return weather_set[column_name].tolist()

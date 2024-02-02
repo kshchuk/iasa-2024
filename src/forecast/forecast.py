@@ -60,10 +60,10 @@ class WeatherForecast:
                                            days=distance_days, hours=0))
         history = prediction_dict[DataFrameType.DailyHistory.value]
         prediction = prediction_dict[DataFrameType.DailyPrediction.value]
-        weather_codes = self.weather_code_predictor.get_weather_codes_frame(
-            history, prediction, self.include_regressors_daily
-        )
-        prediction['weather_code'] = weather_codes
+        # weather_codes = self.weather_code_predictor.get_weather_codes_frame(
+        #    history, prediction, self.include_regressors_daily
+        #)
+        # prediction['weather_code'] = weather_codes
         print('WITH WEATHER CODES', len(prediction))
         actual_daily = actual_data[DataFrameType.DailyHistory.value]
         return prediction, actual_daily
