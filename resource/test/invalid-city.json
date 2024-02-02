@@ -1,0 +1,9 @@
+[ {
+  "id" : 1,
+  "name" : "Ushuaia",
+  "country" : "Argentina",
+  "state" : "Argentina, Tierra del Fuego",
+  "lat" : -54.799999,
+  "lon" : -68.300003,
+  "population" : 56825
+} ]
