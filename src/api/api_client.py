@@ -5,9 +5,9 @@ from retry_requests import retry
 import pandas as pd
 import openmeteo_requests
 
-from src.utils.analyses_utils import plot_features_evolution, prepare_data, DataFrameType
-from src.utils.analyses_utils import print_statistics
-from src.weather_prediction.prophet.prophet_model import ProphetWeatherPredictionModel
+from utils.analyses_utils import plot_features_evolution, prepare_data, DataFrameType
+from utils.analyses_utils import print_statistics
+from weather_prediction.prophet.prophet_model import ProphetWeatherPredictionModel
 from weather_prediction.features import all_hourly_features, hourly_discrete_features, hourly_regressors
 
 
