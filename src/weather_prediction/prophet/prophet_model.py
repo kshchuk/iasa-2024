@@ -161,7 +161,7 @@ class ProphetWeatherPredictionModel:
             test_date_index = i + testing_period_size - 1
             test_date = df.iloc[test_date_index]
 
-            start_ds = df.iloc[i + train_size - 1]["ds"]  # start forecasting from
+            start_ds = df.iloc[i + train_size]["ds"]  # start forecasting from
 
             model = ProphetWeatherPredictionModel(train, df_type, regressors)
             forecast = model.predict(test_size, start_ds, train_size)
