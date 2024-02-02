@@ -9,8 +9,12 @@ from weather_prediction.features import daily_discrete_features, daily_regressor
     hourly_regressors
 from weather_prediction.prophet.prophet_model import ProphetWeatherPredictionModel
 
-daily_train_size = 25  # how many days to use for training
 hourly_train_size = 1000  # how many hours to use for training
+
+
+# formula to calculate the number of days to train the model
+def calculate_daily_train_size(period: int) -> int:
+    return int(period * 9 - 5)
 
 
 class WeatherPredictor:
@@ -71,7 +75,7 @@ class WeatherPredictor:
                                                   dataframe,
                                                   DataFrameType.DailyHistory,
                                                   daily_regressors,
-                                                  daily_train_size)
+                                                  calculate_daily_train_size(7))
         return test
 
     def get_actual_data(self, lat: float, lon: float, start: str,
@@ -107,16 +111,16 @@ class WeatherPredictor:
         :param end: (str) End date to predict ISO 8601, e.g. end=2024-01-26.
         :return: (dict) Predicted daily weather.
         """
-        df_start = (pd.to_datetime(start) - pd.Timedelta(days=daily_train_size)).date()
+        period = (pd.to_datetime(end) - pd.to_datetime(start)).days
+        df_start = (pd.to_datetime(start) - pd.Timedelta(days=calculate_daily_train_size(period))).date()
         df_end = (pd.to_datetime(start) - pd.Timedelta(days=1)).date()
         df = self._api_client.get_daily_weather_history(lat, lon, df_start.__str__(), df_end.__str__())
         df = prepare_data(df, daily_discrete_features)
 
         daily_model = ProphetWeatherPredictionModel(df, DataFrameType.DailyHistory, daily_regressors)
 
-        period = pd.to_datetime(end) - pd.to_datetime(start)
         start_date = pd.to_datetime(start)
-        return (daily_model.predict(period.days, start_date.__str__(), daily_train_size), df)
+        return daily_model.predict(period, start_date.__str__(), calculate_daily_train_size(period)), df
 
     def _predict_hourly_weather(self, lat: float, lon: float, start: str, end: str) -> (pd.DataFrame, pd.DataFrame):
         """
@@ -140,12 +144,12 @@ class WeatherPredictor:
         return hourly_model.predict(period.days * 24, start_date.__str__(), hourly_train_size), df
 
 
-# pd.set_option('display.max_columns', None)
+pd.set_option('display.max_columns', None)
 
-# pd.set_option('display.max_colwidth', None)
-# pd.set_option('display.width', None)
+pd.set_option('display.max_colwidth', None)
+pd.set_option('display.width', None)
 
-# predictor = WeatherPredictor()
+predictor = WeatherPredictor()
 # prediction = predictor.predict_weather(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=50, days=7)
 
 # actual = predictor.get_actual_data(-11.754611883149868, 19.918700267723633, "2021-01-01", hours=50, days=7)
@@ -156,5 +160,5 @@ class WeatherPredictor:
 # print(prediction[DataFrameType.HourlyPrediction.value])
 # print(actual[DataFrameType.HourlyHistory.value])
 
-# metrics = predictor.calculate_metrics(-11.754611883149868, 19.918700267723633, "2000-01-01", "2021-01-01")
-# print(metrics)
+metrics = predictor.calculate_metrics(-11.754611883149868, 19.918700267723633, "2020-01-01", "2021-01-01")
+print(metrics)
