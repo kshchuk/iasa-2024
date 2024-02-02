@@ -38,8 +38,10 @@ def print_statistics(data_frame: pd.DataFrame, features: list[str]):
 
 
 class DataFrameType(Enum):
-    Daily = "DAILY"
-    Hourly = "HOURLY"
+    DailyPrediction = "DAILY_PREDICTION"
+    HourlyPrediction = "HOURLY_PREDICTION"
+    DailyHistory = "DAILY_HISTORY"
+    HourlyHistory = "HOURLY_HISTORY"
 
     def __eq__(self, other):
         return self.value == other.value

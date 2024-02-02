@@ -79,10 +79,10 @@ class ProphetWeatherPredictionModel:
         :return: (pd.DataFrame) Dataframe with predictions.
         :raises ValueError: If the DataFrameType is unknown.
         """
-        if self._df_type == DataFrameType.Daily:
+        if self._df_type == DataFrameType.DailyHistory:
             start_train_date = pd.to_datetime(start_date) - pd.DateOffset(days=train_size)
             end_train_date = pd.to_datetime(start_date) - pd.DateOffset(days=1)
-        elif self._df_type == DataFrameType.Hourly:
+        elif self._df_type == DataFrameType.HourlyHistory:
             start_train_date = pd.to_datetime(start_date) - pd.DateOffset(hours=train_size)
             end_train_date = pd.to_datetime(start_date) - pd.DateOffset(hours=1)
         else:
@@ -188,8 +188,8 @@ class ProphetWeatherPredictionModel:
         :return: (pd.DataFrame) Empty dataframe with future dates.
         """
         future = pd.DataFrame()
-        if df_type == DataFrameType.Daily:
+        if df_type == DataFrameType.DailyHistory:
             future["ds"] = pd.date_range(start=start, periods=periods, freq="D")
-        elif df_type == DataFrameType.Hourly:
+        elif df_type == DataFrameType.HourlyHistory:
             future["ds"] = pd.date_range(start=start, periods=periods, freq="h")
         return future
