@@ -1,7 +1,7 @@
 import traceback
 
 import panel.widgets
-from ipyleaflet import Map
+from ipyleaflet import Map, Marker
 import panel as pn
 
 import datetime
@@ -16,13 +16,15 @@ ACCENT_BASE_COLOR = "#DAA520"
 
 
 class MapViewer:
-    start_point: tuple[int, int] = (50.45, 30.52)
+    start_point: tuple[float, float] = (50.45, 30.52)
 
     def __init__(self):
         self.map: Map = Map(center=self.start_point, zoom=5, height=500,
                             scroll_wheel_zoom=True)
+        self.current_point: tuple[float, float] = self.start_point
+        self.marker: Marker = Marker(location=self.start_point, visible=True)
+        self.map.add(self.marker)
         self.json_widget: pn.pane.JSON = pn.pane.JSON({}, height=75)
-        self.current_point: tuple[int, int] = (0, 0)
 
         self.map.layout.height = "100%"
         self.map.layout.width = "100%"
@@ -33,6 +35,8 @@ class MapViewer:
         self.current_point = (latitude, longitude)
         self.json_widget.object = {"x": self.current_point[0],
                                    "y": self.current_point[1]}
+        self.marker.location = self.current_point
+
         if self.search_box_ref:
             self.search_box_ref.forced_change(
                 self.search_box_ref.autocomplete_helper.find_closest(latitude, longitude))
