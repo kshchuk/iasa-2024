@@ -36,6 +36,7 @@ After selecting location, you can choose paramaters for creating weather predict
 ![image](https://github.com/kshchuk/iasa-2024/assets/96624185/ae99d80c-ad5a-47df-854a-0c497a0eb884)
 
 After pressing button "Predict" you will see table of results with graphics for each parameter.
+Model is training in runtime.
 
 ![image](https://github.com/kshchuk/iasa-2024/assets/96624185/443b6d81-8767-4881-b52f-5967035fbed7)
 ![image](https://github.com/kshchuk/iasa-2024/assets/98614059/0c5ef120-856b-4aa8-9c93-3a3c826333a9)
@@ -48,7 +49,6 @@ The program works with accuracy (for example, for a one-day forecast):
 ```json
 {
   "MAE": {
-    "weather_code": 51.73765735049047,
     "temperature_2m_max": 4.843785274072368,
     "temperature_2m_min": 2.321389825575265,
     "temperature_2m_mean": 0.7550294169010895,
@@ -69,7 +69,6 @@ Day 7 of the forecast:
 ```json
 {
   "MAE": {
-    "weather_code": 9.010742816409458,
     "temperature_2m_max": 1.6072502043560597,
     "temperature_2m_min": 1.2600533888776115,
     "temperature_2m_mean": 1.1235168730263907,
@@ -88,7 +87,6 @@ Day 30 of the forecast:
 ```json
 {
   "MAE": {
-    "weather_code": 3.583367860248783,
     "temperature_2m_max": 3.259992719348105,
     "temperature_2m_min": 2.2311398483630356,
     "temperature_2m_mean": 2.1789147348819746,
@@ -109,7 +107,6 @@ Day 365 of the forecast:
 ```json
 {
   "MAE": {
-    "weather_code": 8.822196300383482,
     "temperature_2m_max": 0.08072807271954474,
     "temperature_2m_min": 0.1332458425827241,
     "temperature_2m_mean": 0.24579642776241073,
@@ -124,3 +121,5 @@ Day 365 of the forecast:
 ```
 
 (Tested on data from "2010-01-01" to "2021-01-01" at location (-11.754611883149868, 19.918700267723633))
+
+Variable "weather_code" is predicted using current weather conditions.
