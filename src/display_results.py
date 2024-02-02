@@ -98,24 +98,43 @@ def _colored_rectangles(words, colors):
 
 
 def _build_result_list_widget(actual_weather, predicted_weather, use_columns, column_names, date_column):
-    list_widget = pn.Column()
-    list_widget.append(
-        _to_pretty_row("<b>Parameter</b>", "<b>Actual</b>", "<b>Predicted</b>")
-    )
-    for actual_item, predicted_item in zip(actual_weather, predicted_weather):
-        title = actual_item[date_column]
-        date_declaration = pn.widgets.StaticText(name='Date', value=title)
-        column = pn.Column()
-        column.append(date_declaration)
+    def_styles = """
+        <style>
+            table {
+                border-collapse: separate;
+                border-spacing: 0;
+                width: 100%;
+                table-layout: fixed; /* Makes table layout more flexible */
+            }
+            th, td {
+                padding: 8px;
+                text-align: left;
+                border-radius: 8px; /* Rounded corners for cells */
+                border: 1px solid #ccc;
+            }
+           
+        </style>
+        """
+
+    # Starting the HTML table with styles included
+    html = def_styles + '<table>'
+    html += ('<tr><th>Date</th><th>Parameter</th>'
+             '<th style="color:green">Actual</th><th style="color:#dd0000">Predicted</th>'
+             '</tr>')
+
+    for actual_w, predicted_w in zip(actual_weather, predicted_weather):
+        date_rowspan = f'rowspan="{len(column_names)+1}"'
+
+        html += f'<tr><td {date_rowspan} style="vertical-align: middle;"><b>{actual_w["date"]}</b></td></tr>'
         for column_name, pretty_name in zip(use_columns, column_names):
-            actual_value = actual_item[column_name]
-            predicted_value = predicted_item[column_name]
+            html += '<tr>'
+            html += f'<td>{pretty_name}</td>'
+            html += f'<td>{actual_w[column_name]}</td>'
+            html += f'<td>{predicted_w[column_name]}</td>'
+            html += '</tr>'
 
-            row = _to_pretty_row(pretty_name, actual_value, predicted_value)
-            column.append(row)
-        list_widget.append(column)
-
-    return list_widget
+    html += '</table>'
+    return html
 
 
 def _build_plots_widget(actual_weather, predicted_weather, use_columns, column_names, date_column):
