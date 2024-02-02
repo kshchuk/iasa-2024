@@ -109,7 +109,7 @@ class SearchBox:
 
 class OptionsBox:
     def __init__(self):
-        current_date = datetime.date.today()
+        current_date = datetime.date.today() - datetime.timedelta(days=1)
         common_width = 150
         common_height = 50
         min_date = datetime.datetime.strptime("1985-01-01", "%Y-%m-%d").date()
