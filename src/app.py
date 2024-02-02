@@ -42,8 +42,8 @@ class SearchBox:
     affected_map = None
     autocomplete_helper = None
 
-    def __init__(self, autocomplete_helper_arg: AutocompleteHelper, limit=10,
-                 affected_map: MapViewer = None):
+    def __init__(self, autocomplete_helper_arg: AutocompleteHelper,
+                 affected_map: MapViewer = None, limit=10):
         self.autocomplete_helper = autocomplete_helper_arg
         self.affected_map = affected_map
         self.limit = limit
